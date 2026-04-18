@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kria iii — manual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#1e1e26;color:#d8d8e0;font-family:'IBM Plex Sans',sans-serif;font-weight:300;line-height:1.6;padding:24px 16px}
+  .container{max-width:720px;margin:0 auto}
+  h1{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:26px;color:#fff;margin-bottom:6px}
+  .subtitle{font-size:13px;color:#8888a0;margin-bottom:40px;font-family:'IBM Plex Mono',monospace}
+  .ps{margin-bottom:48px;border-top:1px solid #2e2e3a;padding-top:28px}
+  h2{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:17px;color:#fff;margin-bottom:4px}
+  .pn{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#b0a0cc;margin-bottom:12px}
+  .desc{font-size:14px;color:#b0b0c0;margin-bottom:16px;max-width:700px}
+  .gn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#b0a0cc;margin-bottom:12px;line-height:1.5}
+  .dt{font-family:'IBM Plex Mono',monospace;font-size:12px;border-collapse:collapse;margin:16px 0 8px;width:100%}
+  .dt th{text-align:left;color:#b0b0c0;font-weight:500;padding:5px 12px 5px 0;border-bottom:1px solid #2e2e3a}
+  .dt td{padding:5px 12px 5px 0;color:#ccccd8;border-bottom:1px solid #24242e}
+  .fl{font-size:13px;color:#b0b0c0;margin-top:10px}
+  .fl li{margin-bottom:6px;list-style:none;padding-left:16px;position:relative}
+  .fl li::before{content:'›';position:absolute;left:0;color:#b0a0cc;font-weight:600}
+  .k{color:#fff;font-weight:500}
+  .toc{margin-bottom:36px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:2}
+  .toc a{color:#b0a0cc;text-decoration:none;margin-right:16px}
+  .toc a:hover{text-decoration:underline}
+  .gs{width:100%;height:auto;display:block;margin-bottom:4px}
+  .footer{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#555;margin-top:40px;padding-top:16px;border-top:1px solid #2e2e3a}
+  .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;background:#2a2035;color:#b0a0cc;border:1px solid #3a2a4a;border-radius:3px;padding:1px 6px;margin-left:6px;vertical-align:middle;position:relative;top:-1px}
+  .ft{background:#1e2630;border-radius:6px;padding:16px 18px;margin-bottom:18px}
+  .ft h3{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#b0a0cc;font-weight:500;margin-bottom:10px}
+  .ft ul{font-size:13px;color:#b0b0c0}
+  .ft li{margin-bottom:5px;list-style:none;padding-left:16px;position:relative}
+  .ft li::before{content:'—';position:absolute;left:0;color:#555}
+</style>
+<script>
+function G(id,rows,labels){
+  var cw=38,ch=38,gap=3,pad=6,cols=16;
+  var w=pad*2+cols*(cw+gap)-gap;
+  var gh=pad*2+8*(ch+gap)-gap;
+  var lh=labels?22:0;
+  var h=gh+lh;
+  var f=['#2a2a2a','#303030','#3a3a3a','#484848','#575757','#676767','#767676','#858585','#949494','#a0a0a0','#aeaeae','#bebebe','#cccccc','#d9d9d9','#eaeaea','#c4a6e6'];
+  var s='<svg class="gs" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+w+'" height="'+gh+'" rx="10" fill="#141414"/>';
+  for(var r=0;r<8;r++){var rd=rows[r]||[];for(var c=0;c<16;c++){var v=rd[c]!==undefined?rd[c]:0;var x=pad+c*(cw+gap);var y=pad+r*(ch+gap);s+='<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="'+ch+'" rx="4" fill="'+f[v]+'"/>';}}
+  if(labels){var ly=gh+15;for(var i=0;i<labels.length;i++){if(labels[i]){var x=pad+i*(cw+gap)+cw/2;s+='<text x="'+x+'" y="'+ly+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="500" fill="#b0a0cc">'+labels[i]+'</text>';}}}
+  s+='</svg>';
+  document.getElementById(id).innerHTML=s;
+}
+window.addEventListener('DOMContentLoaded',function(){
+  var E=0,D=3,M=7,H=11,B=15;
+
+  // navigation row
+  G('g-nav',
+    [[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[B,5,5,5,E,B,D,D,D,E,D,D,D,E,D,D]],
+    ['1','2','3','4','','trig','note','oct','dur','','loop','div','prob','','scale','pat']);
+
+  // trigger page
+  G('g-trig',
+    [[M,D,D,M,D,D,M,D,D,M,D,D,M,D,D,D],
+     [M,1,1,1,M,1,1,1,M,1,1,1,M,1,1,1],
+     [M,1,M,1,1,1,M,1,1,1,M,1,1,1,1,1],
+     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,D,D,E,E,E,E,E,E,E,D,D],[B,5,5,5,E,B,D,D,D,E,D,D,D,E,D,D]],
+    null);
+
+  // note page
+  G('g-note',
+    [[E,E,E,E,E,E,H,E,E,E,E,E,H,E,E,E],
+     [E,E,E,H,E,E,E,E,E,H,E,E,E,E,E,H],
+     [E,E,H,E,E,H,E,E,H,E,E,H,E,E,H,E],
+     [H,E,E,E,H,E,E,H,E,E,H,E,H,E,E,E],
+     [E,H,E,E,E,E,E,E,E,E,E,E,E,H,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[B,5,5,5,E,D,B,D,D,E,D,D,D,E,D,D]],
+    null);
+
+  // octave page
+  G('g-oct',
+    [[D,D,B,D,D,D,D,D,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,H,E,E,H,E,E,H,E,E,E,H,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [1,1,1,1,H,1,1,H,1,1,H,1,1,H,1,1],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [H,E,E,E,E,H,E,E,E,E,E,E,E,E,H,E],[B,5,5,5,E,D,D,B,D,E,D,D,D,E,D,D]],
+    null);
+
+  // duration page
+  G('g-dur',
+    [[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,B],
+     [E,D,E,D,E,D,E,D,E,E,E,E,E,E,E,E],
+     [E,D,E,D,E,D,E,D,E,E,E,E,E,E,E,E],
+     [E,D,E,D,E,D,E,E,E,E,E,E,E,E,E,E],
+     [E,D,E,D,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,D,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[B,5,5,5,E,D,D,D,B,E,D,D,D,E,D,D]],
+    null);
+
+  // ratchet page
+  G('g-ratch',
+    [[D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [H,E,E,H,E,E,E,E,E,E,E,E,E,E,E,E],
+     [H,D,E,H,D,E,H,D,E,E,E,E,E,E,E,E],
+     [H,D,D,H,D,D,H,D,D,H,D,D,H,D,D,D],
+     [D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D],[B,5,5,5,E,H,D,D,D,E,D,D,D,E,D,D]],
+    null);
+
+  // alt note page
+  G('g-alt',
+    [[H,E,E,E,H,E,E,E,H,E,E,E,H,E,E,E],
+     [E,E,H,E,E,E,H,E,E,E,H,E,E,E,H,E],
+     [E,H,E,H,E,H,E,H,E,H,E,H,E,H,E,H],
+     [H,E,H,E,H,E,H,E,H,E,H,E,H,E,H,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [5,1,5,1,5,1,5,1,1,1,1,1,1,1,1,1],[B,5,5,5,E,D,H,D,D,E,D,D,D,E,D,D]],
+    null);
+
+  // loop overlay
+  G('g-loop',
+    [[B,M,M,M,M,M,M,M,M,M,M,M,M,M,M,B],
+     [H,D,D,D,D,D,D,D,D,D,D,D,D,D,D,H],
+     [H,D,D,D,D,D,D,D,D,D,D,D,D,D,D,H],
+     [H,D,D,D,D,D,D,D,D,D,D,D,D,D,D,H],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[B,5,5,5,E,B,D,D,D,E,B,D,D,E,D,D]],
+    null);
+
+  // time division overlay
+  G('g-timediv',
+    [[B,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D],
+     [1,H,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+     [1,1,1,H,1,1,1,1,1,1,1,1,1,1,1,1],
+     [H,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[B,5,5,5,E,B,D,D,D,E,D,B,D,E,D,D]],
+    null);
+
+  // probability overlay
+  G('g-prob',
+    [[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [H,E,E,E,D,E,E,E,D,D,D,D,D,D,D,D],
+     [D,H,E,E,D,D,E,E,D,D,D,D,D,D,D,D],
+     [D,D,H,E,D,D,D,E,D,D,D,D,D,D,D,D],
+     [D,D,D,H,D,D,D,D,D,D,D,D,D,D,D,D],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [B,5,5,5,E,B,D,D,D,E,D,D,B,E,D,D]],
+    null);
+
+  // scale page
+  G('g-scale',
+    [[D,D,E,B,D,D,D,D,1,E,B,E,E,E,E,E],
+     [D,D,E,B,D,D,D,D,1,E,B,E,E,E,E,E],
+     [D,D,E,B,D,D,D,D,1,E,B,E,E,E,E,E],
+     [D,D,E,B,D,D,D,D,1,B,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,1,E,B,E,E,E,E,E],
+     [B,D,D,D,D,D,D,D,1,E,B,E,E,E,E,E],
+     [D,D,D,D,D,D,D,D,B,E,E,E,E,E,E,E],[B,5,5,5,E,D,D,D,D,E,D,D,D,E,B,D]],
+    null);
+
+  // pattern page
+  G('g-pat',
+    [[H,5,5,5,5,1,1,1,1,1,1,1,1,1,1,1],
+     [1,1,1,4,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [D,1,D,E,E,E,E,E,E,E,E,E,E,E,D,D],[B,5,5,5,E,D,D,D,D,E,D,D,D,E,D,B]],
+    null);
+
+  // time page
+  G('g-time',
+    [[E,E,E,E,E,E,E,D,E,E,E,E,E,E,E,E],
+     [D,D,D,D,D,D,B,D,D,D,D,D,D,D,D,D],
+     [D,D,D,D,D,D,D,D,D,B,D,D,D,D,D,D],
+     [E,E,E,E,E,E,D,D,D,D,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E]],
+    null);
+
+  // config page
+  G('g-cfg',
+    [[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
+     [E,H,H,H,H,E,E,E,E,E,E,B,E,E,E,E],
+     [E,H,E,E,H,E,E,E,E,E,E,E,E,E,E,E],
+     [E,H,E,E,H,E,E,E,E,E,E,E,E,E,E,E],
+     [E,H,H,H,H,E,E,E,E,E,B,B,B,B,E,E],
+     [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E]],
+    null);
+});
+</script>
+</head>
+<body>
+<div class="container">
+<h1>kria iii</h1>
+<p class="subtitle">monome grid one — midi step sequencer — v1.1.0</p>
+
+
+<!-- ─── FEATURES ──────────────────────────────────────── -->
+<div class="ps" id="features">
+<h2>features</h2>
+<p class="desc">kria iii is a 4-track midi step sequencer for monome grid one, running on the iii scripting environment. based on the original ansible kria by monome, adapted for midi output with additional features.</p>
+
+<div class="ft">
+  <h3>from original kria</h3>
+  <ul>
+    <li>4 tracks, 16 steps per track</li>
+    <li>4 parameter pages: trigger, note, octave, duration</li>
+    <li>trigger ratcheting — subdivide steps into up to 5 sub-triggers with individually toggled slots</li>
+    <li>alternate note — second note sequence with additive offset, own loop and clock division</li>
+    <li>loop modifier — per-track loop start/end with wrap-around support</li>
+    <li>clock division per track — 16 division values from 1x to 32x</li>
+    <li>per-step trigger probability — 4 levels: 100%, 50%, 25%, 0%</li>
+    <li>scale system — 16 editable presets, 7 intervals, selectable root note</li>
+    <li>live micro-adjustment — temporary pitch tweaks per scale degree (not saved)</li>
+    <li>5 direction modes — forward, reverse, pingpong, drunk, random</li>
+    <li>note sync — linked note and trigger editing</li>
+    <li>loop sync — 3 modes: none, track, all</li>
+    <li>note quantization (trigger clocking) — pitch playhead advances on trigger fires instead of clock steps</li>
+    <li>pattern cueing — cue next pattern to load on quantized boundary</li>
+    <li>per-track mute — via loop modifier + track button</li>
+    <li>track copy — hold source track, press destination</li>
+    <li>track clear — hold track button for ~2 seconds</li>
+  </ul>
+</div>
+
+<div class="ft">
+  <h3>modifications from original</h3>
+  <ul>
+    <li>midi output instead of cv/gate — configurable midi channel per track (1-16), fixed velocity 100</li>
+    <li>midi clock output — sends 0xF8 clock, 0xFA start, 0xFC stop</li>
+    <li>two loops per track instead of four — a trigger loop (shared by trigger, ratchet, octave, duration) and an alt-note loop (shared by note and alt note)</li>
+    <li>alt note extends into next octave — combined note + offset maps into extended scale table (degrees 8-21) rather than wrapping via modulo</li>
+    <li>extended global octave — 8 positions covering -2 to +5 octaves, vs original's 0 to +5</li>
+    <li>ratchet respects mute and probability — each sub-trigger checks mute state and step probability before firing</li>
+    <li>0xFA and 0xFB both reset and start — both midi start and continue messages reset playheads and begin from loop start</li>
+    <li>time and config accessed from trigger page — row 7, cols 6-7 on trigger page, instead of dedicated hardware keys</li>
+    <li>default loop sync set to all — all tracks share loop points on startup</li>
+  </ul>
+</div>
+
+<div class="ft">
+  <h3>additions</h3>
+  <ul>
+    <li>internal tempo control — two-row ms-based period control (20-275ms per step) with hold-to-nudge buttons</li>
+    <li>external midi clock input — automatic detection, configurable subdivision</li>
+    <li>16 pattern slots — ram storage with flash file persistence via save-all and load-all</li>
+    <li>pattern clear mode — dedicated button on pattern page for single-press clearing of any slot</li>
+    <li>scale copy — copy intervals between scale presets</li>
+    <li>auto quantization row — cue clock syncs with longest active track's loop length and division</li>
+  </ul>
+</div>
+</div>
+
+<!-- ─── NAVIGATION ───────────────────────────────────── -->
+<div class="ps" id="nav">
+<h2>navigation — row 8</h2>
+<p class="desc">row 8 is always visible. controls track selection, page switching, overlays, and transport status.</p>
+<div id="g-nav"></div>
+<div class="gn">cols 1-4: tracks · cols 6-9: pages · cols 11-13: overlays (hold) · col 15: scale (hold) · col 16: pattern (hold)</div>
+<ul class="fl">
+  <li><span class="k">cols 1-4 (tracks):</span> press to select the active track for editing. active track = full brightness. muted tracks = dim.</li>
+  <li><span class="k">col 6:</span> trigger page. press again while on trigger = toggle ratchet sub-page (blinks). <span class="k">col 7:</span> note. press again = toggle alt note (blinks).</li>
+  <li><span class="k">col 8:</span> octave page. <span class="k">col 9:</span> duration page.</li>
+  <li><span class="k">col 11:</span> loop overlay (hold). <span class="k">col 12:</span> time division overlay (hold). <span class="k">col 13:</span> probability overlay (hold).</li>
+  <li><span class="k">col 15:</span> scale page (hold). <span class="k">col 16:</span> pattern page (hold). when not held, pulses to show transport state.</li>
+  <li><span class="k">mute:</span> hold loop (col 11) + press a track button. press again to unmute.</li>
+  <li><span class="k">track copy:</span> press and hold a track button, then press another track — copies the current page's data to the destination track.</li>
+  <li><span class="k">track clear:</span> press and hold a track button for ~2 seconds — resets that track's data for the current page to defaults.</li>
+</ul>
+</div>
+
+<!-- ─── TRIGGER ──────────────────────────────────────── -->
+<div class="ps" id="trig">
+<h2>trigger page</h2>
+<p class="pn">col 6 — row 8</p>
+<p class="desc">four tracks of triggers displayed simultaneously. each row is one track.</p>
+<div id="g-trig"></div>
+<div class="gn">rows 1-4: tracks 1-4 · row 7: time (col 6) · config (col 7) · play/stop (col 15) · reset (col 16)</div>
+<ul class="fl">
+  <li><span class="k">rows 1-4, cols 1-16:</span> press to toggle triggers on/off. triggers shown at equal brightness across all tracks. the playhead is always the brightest element — medium brightness when stopped, full brightness when running.</li>
+  <li><span class="k">play/stop (row 7, col 15):</span> toggles internal transport. sends midi start (0xFA) on play, midi stop (0xFC) on stop. disabled while external midi clock is active.</li>
+  <li><span class="k">reset (row 7, col 16):</span> returns all playheads to loop start. if transport is running, immediately plays step 1. button flashes to confirm.</li>
+  <li><span class="k">time page (row 7, col 6):</span> hold to open the time/tempo page.</li>
+  <li><span class="k">config page (row 7, col 7):</span> hold to open the config/sync page.</li>
+</ul>
+</div>
+
+<!-- ─── NOTE ─────────────────────────────────────────── -->
+<div class="ps" id="note">
+<h2>note page</h2>
+<p class="pn">col 7 — row 8</p>
+<p class="desc">sets the pitch for each step of the selected track. 7 rows = 7 scale degrees. row 7 = degree 1 (root), row 1 = degree 7 (highest).</p>
+<div id="g-note"></div>
+<div class="gn">rows 1-7: scale degrees 7 to 1 · row 7 = default row (dim = step has trigger)</div>
+<ul class="fl">
+  <li><span class="k">note sync on (default):</span> pressing a step's current note toggles the trigger off and removes the note. pressing a new row sets the note and enables the trigger.</li>
+  <li><span class="k">note sync off:</span> note and trigger are independent. row 7 shows dim markers for steps that have triggers. notes display regardless of trigger state.</li>
+  <li><span class="k">note quantization mode (tclk):</span> when enabled per track (scale page, col 2), the pitch playhead runs on the alt-note loop boundaries and advances on each trigger fire rather than on each clock step. the displayed playhead shifts to show the note quantization position.</li>
+</ul>
+</div>
+
+<!-- ─── OCTAVE ────────────────────────────────────────── -->
+<div class="ps" id="oct">
+<h2>octave page</h2>
+<p class="pn">col 8 — row 8</p>
+<p class="desc">global octave offset per track and per-step transposition.</p>
+<div id="g-oct"></div>
+<div class="gn">row 1 cols 1-8: global offset · rows 2-7: per-step (row 5 = default, no shift)</div>
+<table class="dt">
+<tr><th>row 1 col</th><th>semitones</th><th>octaves</th></tr>
+<tr><td>1</td><td>-24</td><td>-2</td></tr>
+<tr><td>2</td><td>-12</td><td>-1</td></tr>
+<tr><td class="k">3</td><td class="k">0</td><td class="k">— (default)</td></tr>
+<tr><td>4</td><td>+12</td><td>+1</td></tr>
+<tr><td>5</td><td>+24</td><td>+2</td></tr>
+<tr><td>6</td><td>+36</td><td>+3</td></tr>
+<tr><td>7</td><td>+48</td><td>+4</td></tr>
+<tr><td>8</td><td>+60</td><td>+5</td></tr>
+</table>
+<ul class="fl">
+  <li><span class="k">rows 2-7, per-step:</span> row 2 = +3 oct (+36), row 3 = +2 oct (+24), row 4 = +1 oct (+12), row 5 = 0 (default), row 6 = -1 oct (-12), row 7 = -2 oct (-24).</li>
+  <li>global and per-step offsets stack additively with the scale note value.</li>
+</ul>
+</div>
+
+<!-- ─── DURATION ──────────────────────────────────────── -->
+<div class="ps" id="dur">
+<h2>duration page</h2>
+<p class="pn">col 9 — row 8</p>
+<p class="desc">global note length multiplier and per-step duration sliders.</p>
+<div id="g-dur"></div>
+<div class="gn">row 1: global multiplier (col 1 = shortest, col 16 = full) · row 2: trigger indicators · rows 3-7: per-step sliders</div>
+<ul class="fl">
+  <li><span class="k">row 1, cols 1-16:</span> global duration scaling for the active track. col 16 = 100% (full step length), col 1 = ~6%. multiplies all per-step durations.</li>
+  <li><span class="k">row 2:</span> shows which steps have triggers (dim). press to set that step's duration to 0 (very short / percussive).</li>
+  <li><span class="k">rows 3-7:</span> per-step duration slider. more rows filled = longer note. row 3 = 25%, row 4 = 50%, row 5 = 75%, row 6 = 100%, row 7 = tied (full step, capped by global multiplier).</li>
+</ul>
+</div>
+
+<!-- ─── RATCHET ───────────────────────────────────────── -->
+<div class="ps" id="ratch">
+<h2>trigger ratchet</h2>
+<p class="pn">col 6 (second press) — blinks when active</p>
+<p class="desc">subdivide each step into up to 5 individually toggled sub-triggers. rests can be placed anywhere within the subdivision. respects mute and step probability.</p>
+<div id="g-ratch"></div>
+<div class="gn">row 1: increment (tap +1, hold = fill all) · rows 2-6: slots 5 to 1 · row 7: decrement (tap -1, hold = clear step)</div>
+<ul class="fl">
+  <li><span class="k">rows 2-6, cols 1-16:</span> the ratchet slot grid. row 2 = slot 5 (top), row 6 = slot 1 (bottom). lit slots within the step's ratchet count will fire. dim slots are rests.</li>
+  <li><span class="k">press rows 2-6:</span> toggle a slot on/off. pressing a slot above the current ratchet count extends the count to include that slot.</li>
+  <li><span class="k">row 1 tap:</span> increment that step's ratchet count by 1 (max 5), enables the new top slot.</li>
+  <li><span class="k">row 1 hold (~0.8s):</span> fills all 16 steps to maximum count with all slots enabled.</li>
+  <li><span class="k">row 7 tap:</span> decrement that step's count by 1 (min 1). slot 1 is always preserved as enabled.</li>
+  <li><span class="k">row 7 hold (~0.8s):</span> resets that specific step to count 1 with slot 1 enabled.</li>
+  <li>ratchet subdivisions fire evenly spaced within the step duration. each active sub-trigger also advances the note quantization playhead (when tclk is on).</li>
+</ul>
+</div>
+
+<!-- ─── ALT NOTE ──────────────────────────────────────── -->
+<div class="ps" id="alt">
+<h2>alt note</h2>
+<p class="pn">col 7 (second press) — blinks when active</p>
+<p class="desc">a second note sequence that adds a scale degree offset on top of the main note. both sequences share the same trigger, but the alt note has its own playhead, loop, and clock division. the combined index maps into the extended scale table, reaching into the next octave rather than wrapping.</p>
+<div id="g-alt"></div>
+<div class="gn">rows 1-6: alt note offsets (+6 to +1 degrees into scale) · row 7: default/clear row</div>
+<ul class="fl">
+  <li><span class="k">rows 1-6, cols 1-16:</span> additive offset into the cs[] scale lookup. row 6 = +1, row 5 = +2, row 4 = +3, row 3 = +4, row 2 = +5, row 1 = +6. press the same row again to remove the alt note for that step.</li>
+  <li><span class="k">row 7:</span> indicates steps with no alt note set. steps that have a trigger show dim. press row 7 to clear the alt note on a step.</li>
+  <li>the offset adds to the main note's scale index. e.g. main note = degree 4, alt = +3 = index 7 = cs[7] (degree 7). if the result exceeds 7, it maps to cs[8-21] (next octave) rather than wrapping.</li>
+  <li>the alt note playhead (aph) has its own loop visible and editable on the loop overlay when on this page.</li>
+  <li>alt note always applies when set — there is no per-step alt note probability.</li>
+</ul>
+</div>
+
+<!-- ─── LOOP OVERLAY ──────────────────────────────────── -->
+<div class="ps" id="loop">
+<h2>loop overlay</h2>
+<p class="pn">col 11 — hold</p>
+<p class="desc">shows and edits loop start/end points. which loop is displayed depends on the current page view.</p>
+<div id="g-loop"></div>
+<div class="gn">rows 1-4: loop window per track · endpoints = bright · interior = medium · active track brighter</div>
+<ul class="fl">
+  <li>when on <span class="k">trigger, ratchet, octave, or duration</span> pages: shows the trigger loop (ls/le) for each track.</li>
+  <li>when on <span class="k">note or alt note</span> pages: shows the alt-note loop (als/ale) for each track.</li>
+  <li><span class="k">setting a loop:</span> first press sets the start point for the track in that row. second press sets the end point. loops can wrap — if the end column is to the left of the start, the loop wraps around step 16 back to step 1.</li>
+  <li>any track's loop can be edited, not just the active track.</li>
+  <li><span class="k">mute toggle:</span> while holding loop (col 11), press a track button (row 8, cols 1-4) to mute or unmute.</li>
+  <li><span class="k">loop sync</span> (set in config page) determines whether setting one loop type also updates the other, and whether tracks share the same loop.</li>
+</ul>
+</div>
+
+<!-- ─── TIME DIVISION OVERLAY ─────────────────────────── -->
+<div class="ps" id="timediv">
+<h2>time division overlay</h2>
+<p class="pn">col 12 — hold</p>
+<p class="desc">sets the clock division for each track independently. determines how many master clock ticks equal one sequencer step.</p>
+<div id="g-timediv"></div>
+<div class="gn">rows 1-4: division per track · active track = bright selection · others = dim</div>
+<table class="dt">
+<tr><th>col</th><th>division</th><th>col</th><th>division</th></tr>
+<tr><td class="k">1</td><td class="k">1x (default)</td><td>9</td><td>10x</td></tr>
+<tr><td>2</td><td>2x</td><td>10</td><td>12x</td></tr>
+<tr><td>3</td><td>3x</td><td>11</td><td>14x</td></tr>
+<tr><td>4</td><td>4x</td><td>12</td><td>16x</td></tr>
+<tr><td>5</td><td>5x</td><td>13</td><td>20x</td></tr>
+<tr><td>6</td><td>6x</td><td>14</td><td>24x</td></tr>
+<tr><td>7</td><td>7x</td><td>15</td><td>28x</td></tr>
+<tr><td>8</td><td>8x</td><td>16</td><td>32x</td></tr>
+</table>
+<ul class="fl">
+  <li><span class="k">on alt note page (vm=12), active track:</span> sets the alt-note clock division (adv2) independently from the trigger division.</li>
+  <li><span class="k">all other contexts:</span> sets the trigger clock division (dv2) for that track.</li>
+</ul>
+</div>
+
+<!-- ─── PROBABILITY OVERLAY ───────────────────────────── -->
+<div class="ps" id="prob">
+<h2>probability overlay</h2>
+<p class="pn">col 13 — hold</p>
+<p class="desc">per-step probability of firing. controls the chance that a triggered step will actually play. when a step is skipped, a note-off is sent instead.</p>
+<div id="g-prob"></div>
+<div class="gn">rows 2-5: probability fader per step · row 2 = 100% · row 5 = 0%</div>
+<table class="dt">
+<tr><th>selected row</th><th>probability</th></tr>
+<tr><td class="k">row 2</td><td class="k">100% — always fires (default)</td></tr>
+<tr><td>row 3</td><td>50% — fires roughly half the time</td></tr>
+<tr><td>row 4</td><td>25% — fires roughly one in four</td></tr>
+<tr><td>row 5</td><td>0% — never fires</td></tr>
+</table>
+<ul class="fl">
+  <li>rows below the selected level fill dim to show the probability amount visually.</li>
+  <li>probability is evaluated randomly each time the step is reached.</li>
+  <li>steps with active triggers show brighter. playhead step highlighted.</li>
+  <li>probability applies to trigger firing on all pages — there is no separate per-parameter probability.</li>
+</ul>
+</div>
+
+<!-- ─── SCALE PAGE ────────────────────────────────────── -->
+<div class="ps" id="scale">
+<h2>scale page</h2>
+<p class="pn">col 15 — hold</p>
+<p class="desc">global scale with 16 editable presets. also contains per-track settings for midi channel, note quantization, and play direction.</p>
+<div id="g-scale"></div>
+<div class="gn">rows 1-4 cols 1-8: per-track settings · rows 1-6 cols 9-16: interval editor · row 6 cols 1-8: presets 1-8 · row 7: presets 9-16 + root note</div>
+
+<p class="desc" style="margin-top:12px">— per-track settings (rows 1-4, cols 1-8)</p>
+<ul class="fl">
+  <li><span class="k">col 1 (midi channel):</span> press to enter channel select for that track. the track's full row switches to show cols 1-16 = channels 1-16. press a channel to assign. press col 1 again to exit without changing.</li>
+  <li><span class="k">col 2 (note quantization):</span> toggles tclk for that track. when lit, the pitch is read from the note quantization playhead (nph), which advances on each trigger fire and follows alt-note loop boundaries, rather than the main clock step.</li>
+  <li><span class="k">cols 4-8 (direction):</span> col 4 = forward, col 5 = reverse, col 6 = pingpong (bounce), col 7 = random walk (+/-1 each step), col 8 = random (any step in loop). applies to both the trigger and alt-note playheads for that track. reverse starts playback from the loop end point (le/ale) rather than the loop start.</li>
+</ul>
+
+<p class="desc" style="margin-top:12px">— scale interval editor (rows 1-6, cols 9-16)</p>
+<ul class="fl">
+  <li>each row represents one interval: the number of semitones between consecutive scale degrees. row 6 = interval between degrees 1 and 2, row 1 = interval between degrees 6 and 7.</li>
+  <li>cols 9-16 = 0-7 semitones. col 9 = reference (0, unison, always dim). bright = current interval for that degree.</li>
+  <li><span class="k">press:</span> set that interval and save to the current preset. immediately rebuilds the scale.</li>
+  <li><span class="k">hold scale key (col 15) + press interval:</span> stretch mode — adjusts the selected interval and compensates the adjacent interval to preserve the overall scale range.</li>
+  <li><span class="k">second press of the same position (shk):</span> live micro-adjust mode (sadj). adjusts the pitch of that degree without changing the stored preset interval. shown as a secondary dim led. cleared when the scale changes or a new interval is set.</li>
+</ul>
+
+<p class="desc" style="margin-top:12px">— scale presets (rows 6-7, cols 1-8)</p>
+<ul class="fl">
+  <li>16 preset slots. row 6 = slots 1-8, row 7 = slots 9-16. bright = currently active slot (asd).</li>
+  <li>sd[1-7] = the 7 musical modes (ionian through locrian). sd[8-16] = chromatic {1,1,1,1,1,1,1}.</li>
+  <li><span class="k">press:</span> switch to that preset. loads its intervals and rebuilds the scale.</li>
+  <li><span class="k">copy:</span> press destination preset, then press source preset while holding scale key (col 15) — copies source intervals to destination.</li>
+  <li><span class="k">reset to factory:</span> hold scale key (col 15) and press a preset slot — restores that slot to its default mode.</li>
+</ul>
+
+<p class="desc" style="margin-top:12px">— root note (row 7, cols 9-16)</p>
+<ul class="fl">
+  <li>12 chromatic positions (c through b). bright = current root. col 9 = c (reference). the root sets the base midi note (c3 = 48 by default).</li>
+</ul>
+</div>
+
+<!-- ─── PATTERN PAGE ───────────────────────────────────── -->
+<div class="ps" id="pat">
+<h2>pattern page</h2>
+<p class="pn">col 16 — hold</p>
+<p class="desc">16 independent pattern slots stored in ram with optional flash file persistence. supports quantized pattern cueing.</p>
+<div id="g-pat"></div>
+<div class="gn">row 1: 16 slots · row 2: cue clock length · row 7: file operations + transport</div>
+<ul class="fl">
+  <li><span class="k">row 1 slot brightness:</span> full = current active pattern · medium = saved slot · dim = empty slot · pulsing medium = cued pattern · flash = recently saved.</li>
+  <li><span class="k">short press + release (&lt;1s):</span> directly load that pattern (immediate, no sync). loading an empty slot effectively clears the current state.</li>
+  <li><span class="k">hold ~1s:</span> saves current state to that slot. also switches the active pattern to that slot.</li>
+  <li><span class="k">hold ~3s:</span> saves to slot and writes to flash file storage for the slot.</li>
+  <li><span class="k">hold pattern button (col 16) + press slot:</span> cue that pattern. it will load automatically when the cue clock reaches zero. the cued slot pulses in row 1.</li>
+  <li><span class="k">row 2, cols 1-16:</span> manual cue clock length (1-16 steps). press to set. once pressed, manual mode is active — the cued pattern loads after this many steps of the longest active track's loop.</li>
+  <li><span class="k">row 7, col 1:</span> load all patterns from file. hold ~2s to confirm (button flashes).</li>
+  <li><span class="k">row 7, col 2:</span> toggle clear mode. while active, the next press on any pattern slot in row 1 will erase that slot.</li>
+  <li><span class="k">row 7, col 3:</span> save all patterns to file. hold ~2s to confirm.</li>
+  <li><span class="k">row 7, col 15:</span> play/stop. <span class="k">col 16:</span> reset.</li>
+</ul>
+</div>
+
+<!-- ─── TIME PAGE ─────────────────────────────────────── -->
+<div class="ps" id="time">
+<h2>time page</h2>
+<p class="pn">hold col 6 — row 7 (trigger page only)</p>
+<p class="desc">internal tempo control and external clock configuration. accessed by holding the dim button at row 7, col 6 on the trigger page. the navigation row is hidden while this page is open.</p>
+<div id="g-time"></div>
+<div class="gn">row 1 col 8: beat pulse · row 2: rough (16ms/step) · row 3: fine (1ms/step) · row 4 cols 7-10: nudge</div>
+
+<p class="desc" style="margin-top:4px">— internal clock (no external midi clock)</p>
+<p class="desc">step period (ms) = 20 + (rough col - 1) x 16 + (fine col - 1). range: 20ms-275ms per step. bpm assumes quarter note = 4 steps.</p>
+<table class="dt">
+<tr><th>rough col</th><th>period (fine=10)</th><th>~bpm</th><th>rough col</th><th>period (fine=10)</th><th>~bpm</th></tr>
+<tr><td>1</td><td>29ms</td><td>517</td><td>9</td><td>157ms</td><td>96</td></tr>
+<tr><td>2</td><td>45ms</td><td>333</td><td>10</td><td>173ms</td><td>87</td></tr>
+<tr><td>3</td><td>61ms</td><td>246</td><td>11</td><td>189ms</td><td>79</td></tr>
+<tr><td>4</td><td>77ms</td><td>195</td><td>12</td><td>205ms</td><td>73</td></tr>
+<tr><td>5</td><td>93ms</td><td>161</td><td>13</td><td>221ms</td><td>68</td></tr>
+<tr><td>6</td><td>109ms</td><td>138</td><td>14</td><td>237ms</td><td>63</td></tr>
+<tr><td>7</td><td>125ms</td><td>120</td><td>15</td><td>253ms</td><td>59</td></tr>
+<tr><td>8</td><td>141ms</td><td>106</td><td>16</td><td>269ms</td><td>56</td></tr>
+</table>
+<ul class="fl">
+  <li><span class="k">row 2 (rough):</span> coarse selection, 16ms per column. <span class="k">row 3 (fine):</span> fine selection, 1ms per column. default: rough col 7 + fine col 10 = 125ms (120 bpm).</li>
+  <li><span class="k">pressing row 2 or row 3</span> immediately starts the transport at the new tempo.</li>
+  <li><span class="k">row 4, cols 7-10:</span> hold for continuous tempo nudge. col 7 = -4ms, col 8 = -1ms, col 9 = +1ms, col 10 = +4ms. auto-repeats while held.</li>
+  <li><span class="k">row 1, col 8:</span> beat pulse indicator (bright on beat 1 of every 4 steps).</li>
+  <li>each fine column adds 1ms to the rough base. fine col 1 = +0ms, fine col 16 = +15ms. fine adjustment gives ~1 bpm resolution at slower tempos.</li>
+</ul>
+<p class="desc" style="margin-top:8px">— external midi clock</p>
+<ul class="fl">
+  <li>when external midi clock (0xF8) is detected, internal clock is disabled.</li>
+  <li><span class="k">row 2, cols 1-16:</span> sets the clock subdivision (sp) — how many midi clock pulses equal one sequencer step. default = 6 (sixteenth notes at 24ppqn).</li>
+</ul>
+</div>
+
+<!-- ─── CONFIG PAGE ───────────────────────────────────── -->
+<div class="ps" id="cfg">
+<h2>config page</h2>
+<p class="pn">hold col 7 — row 7 (trigger page only)</p>
+<p class="desc">note-trigger sync and loop sync settings. accessed by holding the dim button at row 7, col 7 on the trigger page. the navigation row is hidden while open.</p>
+<div id="g-cfg"></div>
+<div class="gn">left (cols 2-5, rows 3-6): note sync · right: loop sync — track (col 12 row 3) · all (cols 11-14 row 6)</div>
+<ul class="fl">
+  <li><span class="k">note sync (left block, rows 3-6 cols 2-5):</span> the hollow square icon is bright when note sync is on (default). when on: pressing a step's current note on the note page toggles the trigger off, and setting a new note also enables the trigger. when off: notes and triggers are fully independent.</li>
+  <li><span class="k">loop sync — track (col 12, row 3):</span> when lit, setting the trigger loop for a track also updates its alt-note loop to match, and vice versa.</li>
+  <li><span class="k">loop sync — all (cols 11-14, row 6):</span> when lit (default), all four tracks share the same loop start/end. updating any track's loop updates all tracks simultaneously.</li>
+  <li>loop sync modes are mutually exclusive: none, track, or all. pressing the active mode toggles it off (returns to none).</li>
+</ul>
+</div>
+
+<!-- ─── GESTURES ──────────────────────────────────────── -->
+<div class="ps" id="gestures">
+<h2>gestures</h2>
+<table class="dt">
+<tr><th>gesture</th><th>action</th></tr>
+<tr><td class="k">hold track + press another track</td><td>copy current page data to destination (trigger, note, octave, or duration)</td></tr>
+<tr><td class="k">hold track button ~2s</td><td>clear / reset current page for that track</td></tr>
+<tr><td class="k">hold loop (col 11) + press track</td><td>toggle mute</td></tr>
+<tr><td class="k">press page button again (col 6 or 7)</td><td>toggle ratchet / alt note sub-page</td></tr>
+<tr><td class="k">hold scale (col 15) + press interval</td><td>stretch-adjust interval, compensate adjacent</td></tr>
+<tr><td class="k">press same interval twice</td><td>enter live micro-adjust (sadj) mode</td></tr>
+<tr><td class="k">hold scale (col 15) + press preset</td><td>reset preset to factory default</td></tr>
+<tr><td class="k">press destination preset, hold scale + press source</td><td>copy source preset intervals to destination</td></tr>
+<tr><td class="k">press pattern slot &lt;1s</td><td>direct load</td></tr>
+<tr><td class="k">hold pattern slot ~1s</td><td>save + switch to slot</td></tr>
+<tr><td class="k">hold pattern slot ~3s</td><td>save to slot + write to flash file</td></tr>
+<tr><td class="k">hold pattern page (col 16) + press slot</td><td>cue pattern</td></tr>
+<tr><td class="k">hold row 7 col 6 (time nudge)</td><td>continuous tempo adjust, auto-repeats</td></tr>
+</table>
+</div>
+
+<!-- ─── MIDI CLOCK ────────────────────────────────────── -->
+<div class="ps" id="midi">
+<h2>midi clock</h2>
+<ul class="fl">
+  <li><span class="k">0xF8 (clock):</span> sent every internal tick when not using external clock.</li>
+  <li><span class="k">0xFA (start):</span> sent on play.</li>
+  <li><span class="k">0xFC (stop):</span> sent on stop. triggers note-off for all active notes.</li>
+  <li>external midi clock (0xF8 in): detected automatically. overrides internal clock. tempo is derived from the interval between incoming pulses averaged over the last 8 ticks. when external clock stops and internal transport restarts, tempo is restored from the current time page settings.</li>
+  <li>0xFA / 0xFB received: resets and starts playback from loop start, plays step 1 immediately.</li>
+  <li>0xFC received: stops playback, resets playheads, sends note-off for all tracks.</li>
+</ul>
+</div>
+
+<!-- ─── DEFAULTS ──────────────────────────────────────── -->
+<div class="ps" id="defaults">
+<h2>default settings</h2>
+<p class="desc">state at startup before any patterns are loaded.</p>
+<table class="dt">
+<tr><th>setting</th><th>default</th></tr>
+<tr><td>transport</td><td>stopped</td></tr>
+<tr><td>active track</td><td>1</td></tr>
+<tr><td>active page</td><td>trigger</td></tr>
+<tr><td>triggers</td><td>track 1 step 1 only</td></tr>
+<tr><td>trigger loop</td><td>steps 1-6 (6 steps)</td></tr>
+<tr><td>alt-note loop</td><td>steps 1-6 (matches trigger loop)</td></tr>
+<tr><td>clock division</td><td>1x for all tracks</td></tr>
+<tr><td>direction</td><td>forward for all tracks</td></tr>
+<tr><td>note</td><td>degree 1 (row 7) on all steps</td></tr>
+<tr><td>octave (per-step)</td><td>row 5 (0 offset) on all steps</td></tr>
+<tr><td>octave (global)</td><td>col 3 (0 offset) for all tracks</td></tr>
+<tr><td>duration (per-step)</td><td>0 (shortest) on all steps</td></tr>
+<tr><td>duration (global)</td><td>col 16 (100%) for all tracks</td></tr>
+<tr><td>probability</td><td>100% (row 2) on all steps</td></tr>
+<tr><td>ratchet</td><td>1 subdivision, slot 1 enabled</td></tr>
+<tr><td>alt note</td><td>none on all steps</td></tr>
+<tr><td>tempo</td><td>rough col 7 + fine col 10 = 125ms (120 bpm)</td></tr>
+<tr><td>midi channels</td><td>track 1 = ch 1, track 2 = ch 2, track 3 = ch 3, track 4 = ch 4</td></tr>
+<tr><td>velocity</td><td>100 (fixed, not adjustable)</td></tr>
+<tr><td>scale</td><td>ionian (preset 1), root c</td></tr>
+<tr><td>note sync</td><td>on</td></tr>
+<tr><td>loop sync</td><td>all (all tracks share loop points)</td></tr>
+<tr><td>mute</td><td>all tracks unmuted</td></tr>
+<tr><td>note quantization (tclk)</td><td>off for all tracks</td></tr>
+<tr><td>active pattern</td><td>slot 1</td></tr>
+</table>
+</div>
+
+<!-- ─── CHANGELOG ──────────────────────────────────────── -->
+<div class="ps" id="changelog">
+<h2>changelog</h2>
+<table class="dt">
+<tr><th>version</th><th>changes</th></tr>
+<tr><td class="k">v1.1.0</td><td>default tempo changed to 120 bpm (rough col 7 + fine col 10 = 125ms). trigger page: note brightness on selected track now matches other tracks — playhead is always the brightest element. scale page: reverse direction now correctly starts from loop end (le/ale) rather than step 16. midi clock: internal tempo correctly restored from time page settings when switching back from external clock.</td></tr>
+<tr><td class="k">v1.0.0</td><td>initial stable release.</td></tr>
+</table>
+</div>
+
+<p class="footer">kria iii — monome grid one — midi step sequencer — v1.1.0</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,672 @@
+kria iii
+monome grid one — midi step sequencer — v1.1.0
+
+
+================================================================================
+FEATURES
+================================================================================
+
+kria iii is a 4-track midi step sequencer for monome grid one, running on the
+iii scripting environment. based on the original ansible kria by monome, adapted
+for midi output with additional features.
+
+--- from original kria ---
+
+- 4 tracks, 16 steps per track
+- 4 parameter pages: trigger, note, octave, duration
+- trigger ratcheting — subdivide steps into up to 5 sub-triggers with
+  individually toggled slots
+- alternate note — second note sequence with additive offset, own loop and
+  clock division
+- loop modifier — per-track loop start/end with wrap-around support
+- clock division per track — 16 division values from 1x to 32x
+- per-step trigger probability — 4 levels: 100%, 50%, 25%, 0%
+- scale system — 16 editable presets, 7 intervals, selectable root note
+- live micro-adjustment — temporary pitch tweaks per scale degree (not saved)
+- 5 direction modes — forward, reverse, pingpong, drunk, random
+- note sync — linked note and trigger editing
+- loop sync — 3 modes: none, track, all
+- note quantization (trigger clocking) — pitch playhead advances on trigger
+  fires instead of clock steps
+- pattern cueing — cue next pattern to load on quantized boundary
+- per-track mute — via loop modifier + track button
+- track copy — hold source track, press destination
+- track clear — hold track button for ~2 seconds
+
+--- modifications from original ---
+
+- midi output instead of cv/gate — configurable midi channel per track (1-16),
+  fixed velocity 100
+- midi clock output — sends 0xF8 clock, 0xFA start, 0xFC stop
+- two loops per track instead of four — a trigger loop (shared by trigger,
+  ratchet, octave, duration) and an alt-note loop (shared by note and alt note)
+- alt note extends into next octave — combined note + offset maps into extended
+  scale table (degrees 8-21) rather than wrapping via modulo
+- extended global octave — 8 positions covering -2 to +5 octaves, vs
+  original's 0 to +5
+- ratchet respects mute and probability — each sub-trigger checks mute state
+  and step probability before firing
+- 0xFA and 0xFB both reset and start — both midi start and continue messages
+  reset playheads and begin from loop start
+- time and config accessed from trigger page — row 7, cols 6-7 on trigger page,
+  instead of dedicated hardware keys
+- default loop sync set to all — all tracks share loop points on startup
+
+--- additions ---
+
+- internal tempo control — two-row ms-based period control (20-275ms per step)
+  with hold-to-nudge buttons
+- external midi clock input — automatic detection, configurable subdivision
+- 16 pattern slots — ram storage with flash file persistence via save-all and
+  load-all
+- pattern clear mode — dedicated button on pattern page for single-press
+  clearing of any slot
+- scale copy — copy intervals between scale presets
+- auto quantization row — cue clock syncs with longest active track's loop
+  length and division
+
+
+================================================================================
+NAVIGATION — ROW 8
+================================================================================
+
+row 8 is always visible. controls track selection, page switching, overlays,
+and transport status.
+
+cols 1-4: tracks
+cols 6-9: pages
+cols 11-13: overlays (hold)
+col 15: scale (hold)
+col 16: pattern (hold)
+
+- cols 1-4 (tracks): press to select the active track for editing. active
+  track = full brightness. muted tracks = dim.
+
+- col 6: trigger page. press again while on trigger = toggle ratchet sub-page
+  (blinks).
+  col 7: note. press again = toggle alt note (blinks).
+
+- col 8: octave page.
+  col 9: duration page.
+
+- col 11: loop overlay (hold).
+  col 12: time division overlay (hold).
+  col 13: probability overlay (hold).
+
+- col 15: scale page (hold).
+  col 16: pattern page (hold). when not held, pulses to show transport state.
+
+- mute: hold loop (col 11) + press a track button. press again to unmute.
+
+- track copy: press and hold a track button, then press another track — copies
+  the current page's data to the destination track.
+
+- track clear: press and hold a track button for ~2 seconds — resets that
+  track's data for the current page to defaults.
+
+
+================================================================================
+TRIGGER PAGE
+================================================================================
+
+col 6 — row 8
+
+four tracks of triggers displayed simultaneously. each row is one track.
+
+rows 1-4: tracks 1-4
+row 7: time (col 6) · config (col 7) · play/stop (col 15) · reset (col 16)
+
+- rows 1-4, cols 1-16: press to toggle triggers on/off. triggers shown at
+  equal brightness across all tracks. the playhead is always the brightest
+  element — medium brightness when stopped, full brightness when running.
+
+- play/stop (row 7, col 15): toggles internal transport. sends midi start
+  (0xFA) on play, midi stop (0xFC) on stop. disabled while external midi clock
+  is active.
+
+- reset (row 7, col 16): returns all playheads to loop start. if transport is
+  running, immediately plays step 1. button flashes to confirm.
+
+- time page (row 7, col 6): hold to open the time/tempo page.
+
+- config page (row 7, col 7): hold to open the config/sync page.
+
+
+================================================================================
+NOTE PAGE
+================================================================================
+
+col 7 — row 8
+
+sets the pitch for each step of the selected track. 7 rows = 7 scale degrees.
+row 7 = degree 1 (root), row 1 = degree 7 (highest).
+
+rows 1-7: scale degrees 7 to 1
+row 7 = default row (dim = step has trigger)
+
+- note sync on (default): pressing a step's current note toggles the trigger
+  off and removes the note. pressing a new row sets the note and enables the
+  trigger.
+
+- note sync off: note and trigger are independent. row 7 shows dim markers for
+  steps that have triggers. notes display regardless of trigger state.
+
+- note quantization mode (tclk): when enabled per track (scale page, col 2),
+  the pitch playhead runs on the alt-note loop boundaries and advances on each
+  trigger fire rather than on each clock step. the displayed playhead shifts to
+  show the note quantization position.
+
+
+================================================================================
+OCTAVE PAGE
+================================================================================
+
+col 8 — row 8
+
+global octave offset per track and per-step transposition.
+
+row 1 cols 1-8: global offset
+rows 2-7: per-step (row 5 = default, no shift)
+
+row 1 col  |  semitones  |  octaves
+-----------+-------------+-----------
+1          |  -24        |  -2
+2          |  -12        |  -1
+3          |  0          |  — (default)
+4          |  +12        |  +1
+5          |  +24        |  +2
+6          |  +36        |  +3
+7          |  +48        |  +4
+8          |  +60        |  +5
+
+- rows 2-7, per-step: row 2 = +3 oct (+36), row 3 = +2 oct (+24),
+  row 4 = +1 oct (+12), row 5 = 0 (default), row 6 = -1 oct (-12),
+  row 7 = -2 oct (-24).
+
+- global and per-step offsets stack additively with the scale note value.
+
+
+================================================================================
+DURATION PAGE
+================================================================================
+
+col 9 — row 8
+
+global note length multiplier and per-step duration sliders.
+
+row 1: global multiplier (col 1 = shortest, col 16 = full)
+row 2: trigger indicators
+rows 3-7: per-step sliders
+
+- row 1, cols 1-16: global duration scaling for the active track. col 16 =
+  100% (full step length), col 1 = ~6%. multiplies all per-step durations.
+
+- row 2: shows which steps have triggers (dim). press to set that step's
+  duration to 0 (very short / percussive).
+
+- rows 3-7: per-step duration slider. more rows filled = longer note.
+  row 3 = 25%, row 4 = 50%, row 5 = 75%, row 6 = 100%, row 7 = tied
+  (full step, capped by global multiplier).
+
+
+================================================================================
+TRIGGER RATCHET
+================================================================================
+
+col 6 (second press) — blinks when active
+
+subdivide each step into up to 5 individually toggled sub-triggers. rests can
+be placed anywhere within the subdivision. respects mute and step probability.
+
+row 1: increment (tap +1, hold = fill all)
+rows 2-6: slots 5 to 1
+row 7: decrement (tap -1, hold = clear step)
+
+- rows 2-6, cols 1-16: the ratchet slot grid. row 2 = slot 5 (top), row 6 =
+  slot 1 (bottom). lit slots within the step's ratchet count will fire. dim
+  slots are rests.
+
+- press rows 2-6: toggle a slot on/off. pressing a slot above the current
+  ratchet count extends the count to include that slot.
+
+- row 1 tap: increment that step's ratchet count by 1 (max 5), enables the
+  new top slot.
+
+- row 1 hold (~0.8s): fills all 16 steps to maximum count with all slots
+  enabled.
+
+- row 7 tap: decrement that step's count by 1 (min 1). slot 1 is always
+  preserved as enabled.
+
+- row 7 hold (~0.8s): resets that specific step to count 1 with slot 1
+  enabled.
+
+- ratchet subdivisions fire evenly spaced within the step duration. each
+  active sub-trigger also advances the note quantization playhead (when tclk
+  is on).
+
+
+================================================================================
+ALT NOTE
+================================================================================
+
+col 7 (second press) — blinks when active
+
+a second note sequence that adds a scale degree offset on top of the main note.
+both sequences share the same trigger, but the alt note has its own playhead,
+loop, and clock division. the combined index maps into the extended scale table,
+reaching into the next octave rather than wrapping.
+
+rows 1-6: alt note offsets (+6 to +1 degrees into scale)
+row 7: default/clear row
+
+- rows 1-6, cols 1-16: additive offset into the cs[] scale lookup. row 6 = +1,
+  row 5 = +2, row 4 = +3, row 3 = +4, row 2 = +5, row 1 = +6. press the same
+  row again to remove the alt note for that step.
+
+- row 7: indicates steps with no alt note set. steps that have a trigger show
+  dim. press row 7 to clear the alt note on a step.
+
+- the offset adds to the main note's scale index. e.g. main note = degree 4,
+  alt = +3 = index 7 = cs[7] (degree 7). if the result exceeds 7, it maps to
+  cs[8-21] (next octave) rather than wrapping.
+
+- the alt note playhead (aph) has its own loop visible and editable on the loop
+  overlay when on this page.
+
+- alt note always applies when set — there is no per-step alt note probability.
+
+
+================================================================================
+LOOP OVERLAY
+================================================================================
+
+col 11 — hold
+
+shows and edits loop start/end points. which loop is displayed depends on the
+current page view.
+
+rows 1-4: loop window per track
+endpoints = bright · interior = medium · active track brighter
+
+- when on trigger, ratchet, octave, or duration pages: shows the trigger loop
+  (ls/le) for each track.
+
+- when on note or alt note pages: shows the alt-note loop (als/ale) for each
+  track.
+
+- setting a loop: first press sets the start point for the track in that row.
+  second press sets the end point. loops can wrap — if the end column is to the
+  left of the start, the loop wraps around step 16 back to step 1.
+
+- any track's loop can be edited, not just the active track.
+
+- mute toggle: while holding loop (col 11), press a track button (row 8,
+  cols 1-4) to mute or unmute.
+
+- loop sync (set in config page) determines whether setting one loop type also
+  updates the other, and whether tracks share the same loop.
+
+
+================================================================================
+TIME DIVISION OVERLAY
+================================================================================
+
+col 12 — hold
+
+sets the clock division for each track independently. determines how many
+master clock ticks equal one sequencer step.
+
+rows 1-4: division per track
+active track = bright selection · others = dim
+
+col  |  division        col  |  division
+-----+-------------     -----+----------
+1    |  1x (default)    9    |  10x
+2    |  2x              10   |  12x
+3    |  3x              11   |  14x
+4    |  4x              12   |  16x
+5    |  5x              13   |  20x
+6    |  6x              14   |  24x
+7    |  7x              15   |  28x
+8    |  8x              16   |  32x
+
+- on alt note page (vm=12), active track: sets the alt-note clock division
+  (adv2) independently from the trigger division.
+
+- all other contexts: sets the trigger clock division (dv2) for that track.
+
+
+================================================================================
+PROBABILITY OVERLAY
+================================================================================
+
+col 13 — hold
+
+per-step probability of firing. controls the chance that a triggered step will
+actually play. when a step is skipped, a note-off is sent instead.
+
+rows 2-5: probability fader per step · row 2 = 100% · row 5 = 0%
+
+selected row  |  probability
+--------------+----------------------------------
+row 2         |  100% — always fires (default)
+row 3         |  50% — fires roughly half the time
+row 4         |  25% — fires roughly one in four
+row 5         |  0% — never fires
+
+- rows below the selected level fill dim to show the probability amount
+  visually.
+
+- probability is evaluated randomly each time the step is reached.
+
+- steps with active triggers show brighter. playhead step highlighted.
+
+- probability applies to trigger firing on all pages — there is no separate
+  per-parameter probability.
+
+
+================================================================================
+SCALE PAGE
+================================================================================
+
+col 15 — hold
+
+global scale with 16 editable presets. also contains per-track settings for
+midi channel, note quantization, and play direction.
+
+rows 1-4 cols 1-8: per-track settings
+rows 1-6 cols 9-16: interval editor
+row 6 cols 1-8: presets 1-8
+row 7: presets 9-16 + root note
+
+--- per-track settings (rows 1-4, cols 1-8) ---
+
+- col 1 (midi channel): press to enter channel select for that track. the
+  track's full row switches to show cols 1-16 = channels 1-16. press a channel
+  to assign. press col 1 again to exit without changing.
+
+- col 2 (note quantization): toggles tclk for that track. when lit, the pitch
+  is read from the note quantization playhead (nph), which advances on each
+  trigger fire and follows alt-note loop boundaries, rather than the main clock
+  step.
+
+- cols 4-8 (direction): col 4 = forward, col 5 = reverse, col 6 = pingpong
+  (bounce), col 7 = random walk (+/-1 each step), col 8 = random (any step in
+  loop). applies to both the trigger and alt-note playheads for that track.
+  reverse starts playback from the loop end point (le/ale) rather than the loop
+  start.
+
+--- scale interval editor (rows 1-6, cols 9-16) ---
+
+- each row represents one interval: the number of semitones between consecutive
+  scale degrees. row 6 = interval between degrees 1 and 2, row 1 = interval
+  between degrees 6 and 7.
+
+- cols 9-16 = 0-7 semitones. col 9 = reference (0, unison, always dim).
+  bright = current interval for that degree.
+
+- press: set that interval and save to the current preset. immediately rebuilds
+  the scale.
+
+- hold scale key (col 15) + press interval: stretch mode — adjusts the
+  selected interval and compensates the adjacent interval to preserve the
+  overall scale range.
+
+- second press of the same position (shk): live micro-adjust mode (sadj).
+  adjusts the pitch of that degree without changing the stored preset interval.
+  shown as a secondary dim led. cleared when the scale changes or a new
+  interval is set.
+
+--- scale presets (rows 6-7, cols 1-8) ---
+
+- 16 preset slots. row 6 = slots 1-8, row 7 = slots 9-16. bright = currently
+  active slot (asd).
+
+- sd[1-7] = the 7 musical modes (ionian through locrian).
+  sd[8-16] = chromatic {1,1,1,1,1,1,1}.
+
+- press: switch to that preset. loads its intervals and rebuilds the scale.
+
+- copy: press destination preset, then press source preset while holding scale
+  key (col 15) — copies source intervals to destination.
+
+- reset to factory: hold scale key (col 15) and press a preset slot — restores
+  that slot to its default mode.
+
+--- root note (row 7, cols 9-16) ---
+
+- 12 chromatic positions (c through b). bright = current root. col 9 = c
+  (reference). the root sets the base midi note (c3 = 48 by default).
+
+
+================================================================================
+PATTERN PAGE
+================================================================================
+
+col 16 — hold
+
+16 independent pattern slots stored in ram with optional flash file persistence.
+supports quantized pattern cueing.
+
+row 1: 16 slots
+row 2: cue clock length
+row 7: file operations + transport
+
+- row 1 slot brightness: full = current active pattern · medium = saved slot ·
+  dim = empty slot · pulsing medium = cued pattern · flash = recently saved.
+
+- short press + release (<1s): directly load that pattern (immediate, no sync).
+  loading an empty slot effectively clears the current state.
+
+- hold ~1s: saves current state to that slot. also switches the active pattern
+  to that slot.
+
+- hold ~3s: saves to slot and writes to flash file storage for the slot.
+
+- hold pattern button (col 16) + press slot: cue that pattern. it will load
+  automatically when the cue clock reaches zero. the cued slot pulses in row 1.
+
+- row 2, cols 1-16: manual cue clock length (1-16 steps). press to set. once
+  pressed, manual mode is active — the cued pattern loads after this many steps
+  of the longest active track's loop.
+
+- row 7, col 1: load all patterns from file. hold ~2s to confirm (button
+  flashes).
+
+- row 7, col 2: toggle clear mode. while active, the next press on any pattern
+  slot in row 1 will erase that slot.
+
+- row 7, col 3: save all patterns to file. hold ~2s to confirm.
+
+- row 7, col 15: play/stop.
+  col 16: reset.
+
+
+================================================================================
+TIME PAGE
+================================================================================
+
+hold col 6 — row 7 (trigger page only)
+
+internal tempo control and external clock configuration. accessed by holding
+the dim button at row 7, col 6 on the trigger page. the navigation row is
+hidden while this page is open.
+
+row 1 col 8: beat pulse
+row 2: rough (16ms/step)
+row 3: fine (1ms/step)
+row 4 cols 7-10: nudge
+
+--- internal clock (no external midi clock) ---
+
+step period (ms) = 20 + (rough col - 1) x 16 + (fine col - 1).
+range: 20ms-275ms per step. bpm assumes quarter note = 4 steps.
+
+rough col  |  period (fine=10)  |  ~bpm  ||  rough col  |  period (fine=10)  |  ~bpm
+-----------+--------------------+--------++-------------+--------------------+-------
+1          |  29ms              |  517   ||  9          |  157ms             |  96
+2          |  45ms              |  333   ||  10         |  173ms             |  87
+3          |  61ms              |  246   ||  11         |  189ms             |  79
+4          |  77ms              |  195   ||  12         |  205ms             |  73
+5          |  93ms              |  161   ||  13         |  221ms             |  68
+6          |  109ms             |  138   ||  14         |  237ms             |  63
+7          |  125ms             |  120   ||  15         |  253ms             |  59
+8          |  141ms             |  106   ||  16         |  269ms             |  56
+
+- row 2 (rough): coarse selection, 16ms per column.
+  row 3 (fine): fine selection, 1ms per column.
+  default: rough col 7 + fine col 10 = 125ms (120 bpm).
+
+- pressing row 2 or row 3 immediately starts the transport at the new tempo.
+
+- row 4, cols 7-10: hold for continuous tempo nudge. col 7 = -4ms,
+  col 8 = -1ms, col 9 = +1ms, col 10 = +4ms. auto-repeats while held.
+
+- row 1, col 8: beat pulse indicator (bright on beat 1 of every 4 steps).
+
+- each fine column adds 1ms to the rough base. fine col 1 = +0ms,
+  fine col 16 = +15ms. fine adjustment gives ~1 bpm resolution at slower
+  tempos.
+
+--- external midi clock ---
+
+- when external midi clock (0xF8) is detected, internal clock is disabled.
+
+- row 2, cols 1-16: sets the clock subdivision (sp) — how many midi clock
+  pulses equal one sequencer step. default = 6 (sixteenth notes at 24ppqn).
+
+
+================================================================================
+CONFIG PAGE
+================================================================================
+
+hold col 7 — row 7 (trigger page only)
+
+note-trigger sync and loop sync settings. accessed by holding the dim button at
+row 7, col 7 on the trigger page. the navigation row is hidden while open.
+
+left (cols 2-5, rows 3-6): note sync
+right: loop sync — track (col 12 row 3) · all (cols 11-14 row 6)
+
+- note sync (left block, rows 3-6 cols 2-5): the hollow square icon is bright
+  when note sync is on (default). when on: pressing a step's current note on
+  the note page toggles the trigger off, and setting a new note also enables
+  the trigger. when off: notes and triggers are fully independent.
+
+- loop sync — track (col 12, row 3): when lit, setting the trigger loop for a
+  track also updates its alt-note loop to match, and vice versa.
+
+- loop sync — all (cols 11-14, row 6): when lit (default), all four tracks
+  share the same loop start/end. updating any track's loop updates all tracks
+  simultaneously.
+
+- loop sync modes are mutually exclusive: none, track, or all. pressing the
+  active mode toggles it off (returns to none).
+
+
+================================================================================
+GESTURES
+================================================================================
+
+gesture                                       action
+----------------------------------------------+----------------------------------
+hold track + press another track              copy current page data to
+                                              destination (trigger, note,
+                                              octave, or duration)
+hold track button ~2s                         clear / reset current page for
+                                              that track
+hold loop (col 11) + press track              toggle mute
+press page button again (col 6 or 7)          toggle ratchet / alt note sub-page
+hold scale (col 15) + press interval          stretch-adjust interval,
+                                              compensate adjacent
+press same interval twice                     enter live micro-adjust (sadj) mode
+hold scale (col 15) + press preset            reset preset to factory default
+press dest preset, hold scale + press source  copy source preset intervals to
+                                              destination
+press pattern slot <1s                        direct load
+hold pattern slot ~1s                         save + switch to slot
+hold pattern slot ~3s                         save to slot + write to flash file
+hold pattern page (col 16) + press slot       cue pattern
+hold row 7 col 6 (time nudge)                 continuous tempo adjust,
+                                              auto-repeats
+
+
+================================================================================
+MIDI CLOCK
+================================================================================
+
+- 0xF8 (clock): sent every internal tick when not using external clock.
+
+- 0xFA (start): sent on play.
+
+- 0xFC (stop): sent on stop. triggers note-off for all active notes.
+
+- external midi clock (0xF8 in): detected automatically. overrides internal
+  clock. tempo is derived from the interval between incoming pulses averaged
+  over the last 8 ticks. when external clock stops and internal transport
+  restarts, tempo is restored from the current time page settings.
+
+- 0xFA / 0xFB received: resets and starts playback from loop start, plays
+  step 1 immediately.
+
+- 0xFC received: stops playback, resets playheads, sends note-off for all
+  tracks.
+
+
+================================================================================
+DEFAULT SETTINGS
+================================================================================
+
+state at startup before any patterns are loaded.
+
+setting                      default
+-----------------------------+--------------------------------------------------
+transport                    stopped
+active track                 1
+active page                  trigger
+triggers                     track 1 step 1 only
+trigger loop                 steps 1-6 (6 steps)
+alt-note loop                steps 1-16 (full)
+clock division               1x for all tracks
+direction                    forward for all tracks
+note                         degree 1 (row 7) on all steps
+octave (per-step)            row 5 (0 offset) on all steps
+octave (global)              col 3 (0 offset) for all tracks
+duration (per-step)          0 (shortest) on all steps
+duration (global)            col 16 (100%) for all tracks
+probability                  100% (row 2) on all steps
+ratchet                      1 subdivision, slot 1 enabled
+alt note                     none on all steps
+tempo                        rough col 7 + fine col 10 = 125ms (120 bpm)
+midi channels                track 1 = ch 1, track 2 = ch 2, track 3 = ch 3,
+                             track 4 = ch 4
+velocity                     100 (fixed, not adjustable)
+scale                        ionian (preset 1), root c
+note sync                    on
+loop sync                    all (all tracks share loop points)
+mute                         all tracks unmuted
+note quantization (tclk)     off for all tracks
+active pattern               slot 1
+
+
+================================================================================
+CHANGELOG
+================================================================================
+
+v1.1.0
+  - default tempo changed to 120 bpm (rough col 7 + fine col 10 = 125ms).
+  - trigger page: note brightness on selected track now matches other tracks —
+    playhead is always the brightest element.
+  - scale page: reverse direction now correctly starts from loop end (le/ale)
+    rather than step 16.
+  - midi clock: internal tempo correctly restored from time page settings when
+    switching back from external clock.
+
+v1.0.0
+  - initial stable release.
+
+
+================================================================================
+kria iii — monome grid one — midi step sequencer — v1.1.0
+================================================================================
