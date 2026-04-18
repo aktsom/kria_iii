@@ -1,6 +1,8 @@
 CLAUDE.md
+.claude/
 kria_iii_default.lua
 kria_iii_v*.lua
 kria_iii_commented_v*.lua
 stable version/
 manual/
+kria_iii psets/
