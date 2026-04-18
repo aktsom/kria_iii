@@ -54,8 +54,8 @@ for midi output with additional features.
 
 --- additions ---
 
-- internal tempo control — two-row ms-based period control (20-275ms per step)
-  with hold-to-nudge buttons
+- internal tempo control — bpm-based (30–300 bpm) with rough/fine rows and
+  hold-to-nudge buttons
 - external midi clock input — automatic detection, configurable subdivision
 - 16 pattern slots — ram storage with flash file persistence via save-all and
   load-all
@@ -494,40 +494,42 @@ the dim button at row 7, col 6 on the trigger page. the navigation row is
 hidden while this page is open.
 
 row 1 col 8: beat pulse
-row 2: rough (16ms/step)
-row 3: fine (1ms/step)
+row 2: rough bpm (cols 1-7: +15 bpm, cols 8-16: +20 bpm)
+row 3: fine (+0–+15 bpm)
 row 4 cols 7-10: nudge
 
 --- internal clock (no external midi clock) ---
 
-step period (ms) = 20 + (rough col - 1) x 16 + (fine col - 1).
-range: 20ms-275ms per step. bpm assumes quarter note = 4 steps.
+bpm = cols 1-7: 30 + (col - 1) x 15; cols 8-16: 120 + (col - 7) x 20.
+fine row adds 0–15 bpm offset. step period = 15 / bpm seconds.
 
-rough col  |  period (fine=10)  |  ~bpm  ||  rough col  |  period (fine=10)  |  ~bpm
------------+--------------------+--------++-------------+--------------------+-------
-1          |  29ms              |  517   ||  9          |  157ms             |  96
-2          |  45ms              |  333   ||  10         |  173ms             |  87
-3          |  61ms              |  246   ||  11         |  189ms             |  79
-4          |  77ms              |  195   ||  12         |  205ms             |  73
-5          |  93ms              |  161   ||  13         |  221ms             |  68
-6          |  109ms             |  138   ||  14         |  237ms             |  63
-7          |  125ms             |  120   ||  15         |  253ms             |  59
-8          |  141ms             |  106   ||  16         |  269ms             |  56
+col  |  rough bpm  ||  col  |  rough bpm
+-----+-------------++-------+-----------
+1    |  30         ||  9    |  160
+2    |  45         ||  10   |  180
+3    |  60         ||  11   |  200
+4    |  75         ||  12   |  220
+5    |  90         ||  13   |  240
+6    |  105        ||  14   |  260
+7    |  120        ||  15   |  280
+8    |  140        ||  16   |  300
 
-- row 2 (rough): coarse selection, 16ms per column.
-  row 3 (fine): fine selection, 1ms per column.
-  default: rough col 7 + fine col 10 = 125ms (120 bpm).
+- row 2 (rough): coarse bpm selection. cols 1-7 step in 15 bpm increments
+  (30–120); cols 8-16 step in 20 bpm increments (140–300).
+  row 3 (fine): fine bpm offset, +0–+15 bpm.
+  default: rough col 7 = 120 bpm, fine col 1 = +0 bpm.
 
-- pressing row 2 or row 3 immediately starts the transport at the new tempo.
+- pressing row 2 or row 3 immediately updates the tempo. transport continues
+  uninterrupted.
 
-- row 4, cols 7-10: hold for continuous tempo nudge. col 7 = -4ms,
-  col 8 = -1ms, col 9 = +1ms, col 10 = +4ms. auto-repeats while held.
+- row 4, cols 7-10: hold for continuous tempo nudge. col 7 = -4 bpm,
+  col 8 = -1 bpm, col 9 = +1 bpm, col 10 = +4 bpm. nudge can cross rough
+  column boundaries. auto-repeats while held.
 
 - row 1, col 8: beat pulse indicator (bright on beat 1 of every 4 steps).
 
-- each fine column adds 1ms to the rough base. fine col 1 = +0ms,
-  fine col 16 = +15ms. fine adjustment gives ~1 bpm resolution at slower
-  tempos.
+- each fine column adds 1 bpm to the rough base. fine col 1 = +0 bpm,
+  fine col 16 = +15 bpm.
 
 --- external midi clock ---
 
@@ -638,7 +640,7 @@ duration (global)            col 16 (100%) for all tracks
 probability                  100% (row 2) on all steps
 ratchet                      1 subdivision, slot 1 enabled
 alt note                     none on all steps
-tempo                        rough col 7 + fine col 10 = 125ms (120 bpm)
+tempo                        rough col 7 = 120 bpm, fine col 1 = +0 bpm
 midi channels                track 1 = ch 1, track 2 = ch 2, track 3 = ch 3,
                              track 4 = ch 4
 velocity                     100 (fixed, not adjustable)
@@ -653,6 +655,14 @@ active pattern               slot 1
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.2.0
+  - tempo system redesigned: bpm-based (30–300 bpm) replacing ms-based control.
+  - rough row: 15 bpm steps for cols 1-7 (30–120), 20 bpm steps for cols 8-16
+    (140–300).
+  - fine row: +0–+15 bpm offset.
+  - nudge buttons now cross rough column boundaries for full-range traversal.
+  - alt-note loop initialises to match trigger loop at startup.
 
 v1.1.0
   - default tempo changed to 120 bpm (rough col 7 + fine col 10 = 125ms).

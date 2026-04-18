@@ -181,7 +181,7 @@ window.addEventListener('DOMContentLoaded',function(){
   G('g-time',
     [[E,E,E,E,E,E,E,D,E,E,E,E,E,E,E,E],
      [D,D,D,D,D,D,B,D,D,D,D,D,D,D,D,D],
-     [D,D,D,D,D,D,D,D,D,B,D,D,D,D,D,D],
+     [B,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D],
      [E,E,E,E,E,E,D,D,D,D,E,E,E,E,E,E],
      [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],
      [E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E],[E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E]],
@@ -202,7 +202,7 @@ window.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="container">
 <h1>kria iii</h1>
-<p class="subtitle">monome grid one — midi step sequencer — v1.1.0</p>
+<p class="subtitle">monome grid one — midi step sequencer — v1.2.0</p>
 
 
 <!-- ─── FEATURES ──────────────────────────────────────── -->
@@ -251,7 +251,7 @@ window.addEventListener('DOMContentLoaded',function(){
 <div class="ft">
   <h3>additions</h3>
   <ul>
-    <li>internal tempo control — two-row ms-based period control (20-275ms per step) with hold-to-nudge buttons</li>
+    <li>internal tempo control — bpm-based (30–300 bpm) with rough/fine rows and hold-to-nudge buttons</li>
     <li>external midi clock input — automatic detection, configurable subdivision</li>
     <li>16 pattern slots — ram storage with flash file persistence via save-all and load-all</li>
     <li>pattern clear mode — dedicated button on pattern page for single-press clearing of any slot</li>
@@ -510,27 +510,27 @@ window.addEventListener('DOMContentLoaded',function(){
 <p class="pn">hold col 6 — row 7 (trigger page only)</p>
 <p class="desc">internal tempo control and external clock configuration. accessed by holding the dim button at row 7, col 6 on the trigger page. the navigation row is hidden while this page is open.</p>
 <div id="g-time"></div>
-<div class="gn">row 1 col 8: beat pulse · row 2: rough (16ms/step) · row 3: fine (1ms/step) · row 4 cols 7-10: nudge</div>
+<div class="gn">row 1 col 8: beat pulse · row 2: rough bpm (cols 1-7: +15 bpm, cols 8-16: +20 bpm) · row 3: fine (+0–+15 bpm) · row 4 cols 7-10: nudge</div>
 
 <p class="desc" style="margin-top:4px">— internal clock (no external midi clock)</p>
-<p class="desc">step period (ms) = 20 + (rough col - 1) x 16 + (fine col - 1). range: 20ms-275ms per step. bpm assumes quarter note = 4 steps.</p>
+<p class="desc">bpm = cols 1-7: 30 + (col - 1) × 15; cols 8-16: 120 + (col - 7) × 20. fine row adds 0–15 bpm offset. quarter note = 4 steps (step period = 15 / bpm seconds).</p>
 <table class="dt">
-<tr><th>rough col</th><th>period (fine=10)</th><th>~bpm</th><th>rough col</th><th>period (fine=10)</th><th>~bpm</th></tr>
-<tr><td>1</td><td>29ms</td><td>517</td><td>9</td><td>157ms</td><td>96</td></tr>
-<tr><td>2</td><td>45ms</td><td>333</td><td>10</td><td>173ms</td><td>87</td></tr>
-<tr><td>3</td><td>61ms</td><td>246</td><td>11</td><td>189ms</td><td>79</td></tr>
-<tr><td>4</td><td>77ms</td><td>195</td><td>12</td><td>205ms</td><td>73</td></tr>
-<tr><td>5</td><td>93ms</td><td>161</td><td>13</td><td>221ms</td><td>68</td></tr>
-<tr><td>6</td><td>109ms</td><td>138</td><td>14</td><td>237ms</td><td>63</td></tr>
-<tr><td>7</td><td>125ms</td><td>120</td><td>15</td><td>253ms</td><td>59</td></tr>
-<tr><td>8</td><td>141ms</td><td>106</td><td>16</td><td>269ms</td><td>56</td></tr>
+<tr><th>col</th><th>rough bpm</th><th>col</th><th>rough bpm</th></tr>
+<tr><td>1</td><td>30</td><td>9</td><td>160</td></tr>
+<tr><td>2</td><td>45</td><td>10</td><td>180</td></tr>
+<tr><td>3</td><td>60</td><td>11</td><td>200</td></tr>
+<tr><td>4</td><td>75</td><td>12</td><td>220</td></tr>
+<tr><td>5</td><td>90</td><td>13</td><td>240</td></tr>
+<tr><td>6</td><td>105</td><td>14</td><td>260</td></tr>
+<tr><td>7</td><td>120</td><td>15</td><td>280</td></tr>
+<tr><td>8</td><td>140</td><td>16</td><td>300</td></tr>
 </table>
 <ul class="fl">
-  <li><span class="k">row 2 (rough):</span> coarse selection, 16ms per column. <span class="k">row 3 (fine):</span> fine selection, 1ms per column. default: rough col 7 + fine col 10 = 125ms (120 bpm).</li>
-  <li><span class="k">pressing row 2 or row 3</span> immediately starts the transport at the new tempo.</li>
-  <li><span class="k">row 4, cols 7-10:</span> hold for continuous tempo nudge. col 7 = -4ms, col 8 = -1ms, col 9 = +1ms, col 10 = +4ms. auto-repeats while held.</li>
+  <li><span class="k">row 2 (rough):</span> coarse bpm selection. cols 1-7 step in 15 bpm increments (30–120); cols 8-16 step in 20 bpm increments (140–300). <span class="k">row 3 (fine):</span> fine bpm offset, +0–+15 bpm. default: rough col 7 = 120 bpm, fine col 1 = +0 bpm.</li>
+  <li><span class="k">pressing row 2 or row 3</span> immediately updates the tempo. transport continues uninterrupted.</li>
+  <li><span class="k">row 4, cols 7-10:</span> hold for continuous tempo nudge. col 7 = -4 bpm, col 8 = -1 bpm, col 9 = +1 bpm, col 10 = +4 bpm. nudge can cross rough column boundaries. auto-repeats while held.</li>
   <li><span class="k">row 1, col 8:</span> beat pulse indicator (bright on beat 1 of every 4 steps).</li>
-  <li>each fine column adds 1ms to the rough base. fine col 1 = +0ms, fine col 16 = +15ms. fine adjustment gives ~1 bpm resolution at slower tempos.</li>
+  <li>each fine column adds 1 bpm to the rough base. fine col 1 = +0 bpm, fine col 16 = +15 bpm.</li>
 </ul>
 <p class="desc" style="margin-top:8px">— external midi clock</p>
 <ul class="fl">
@@ -610,7 +610,7 @@ window.addEventListener('DOMContentLoaded',function(){
 <tr><td>probability</td><td>100% (row 2) on all steps</td></tr>
 <tr><td>ratchet</td><td>1 subdivision, slot 1 enabled</td></tr>
 <tr><td>alt note</td><td>none on all steps</td></tr>
-<tr><td>tempo</td><td>rough col 7 + fine col 10 = 125ms (120 bpm)</td></tr>
+<tr><td>tempo</td><td>rough col 7 = 120 bpm, fine col 1 = +0 bpm</td></tr>
 <tr><td>midi channels</td><td>track 1 = ch 1, track 2 = ch 2, track 3 = ch 3, track 4 = ch 4</td></tr>
 <tr><td>velocity</td><td>100 (fixed, not adjustable)</td></tr>
 <tr><td>scale</td><td>ionian (preset 1), root c</td></tr>
@@ -627,12 +627,13 @@ window.addEventListener('DOMContentLoaded',function(){
 <h2>changelog</h2>
 <table class="dt">
 <tr><th>version</th><th>changes</th></tr>
+<tr><td class="k">v1.2.0</td><td>tempo system redesigned: bpm-based (30–300 bpm) replacing ms-based control. rough row: 15 bpm steps for cols 1-7 (30–120), 20 bpm steps for cols 8-16 (140–300). fine row: +0–+15 bpm offset. nudge buttons now cross rough column boundaries for full-range traversal. alt-note loop initialises to match trigger loop at startup.</td></tr>
 <tr><td class="k">v1.1.0</td><td>default tempo changed to 120 bpm (rough col 7 + fine col 10 = 125ms). trigger page: note brightness on selected track now matches other tracks — playhead is always the brightest element. scale page: reverse direction now correctly starts from loop end (le/ale) rather than step 16. midi clock: internal tempo correctly restored from time page settings when switching back from external clock.</td></tr>
 <tr><td class="k">v1.0.0</td><td>initial stable release.</td></tr>
 </table>
 </div>
 
-<p class="footer">kria iii — monome grid one — midi step sequencer — v1.1.0</p>
+<p class="footer">kria iii — monome grid one — midi step sequencer — v1.2.0</p>
 </div>
 </body>
 </html>

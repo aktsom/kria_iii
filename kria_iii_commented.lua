@@ -105,7 +105,7 @@ collectgarbage("collect")
 -- CONSTANTS
 -- ============================================================
 STEPS=16 PPQN=24
-tro=6 tfi=9 cpd=0.125
+tro=6 tfi=0 cpd=0.125
 TCH={1,2,3,4}
 MC8={0xF8} MCA={0xFA} MCC={0xFC} gcc=0
 DV={1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32}
@@ -149,7 +149,7 @@ function rset(t,s,i,v)
 if v then rsl[t][s] = rsl[t][s] | (1 << (i-1))
 else rsl[t][s] = rsl[t][s] & ~(1 << (i-1)) end
 end
-function ucpd() cpd=(20+tro*16+tfi)/1000 end
+function ucpd() local b=tro<7 and 30+tro*15 or 120+(tro-6)*20 cpd=15/(b+tfi) if tr2 and not ms then icl.time=cpd end end
 function ublk() blk=false end
 function nls(t,s)
 local st=cpd local r=du[t][s] or 1 local m=DM[17-gdu[t]] or 1
@@ -879,14 +879,10 @@ end
 rd() gl(16,7,BF) gr()
 end
 function tadj(k)
-local cp2=20+tro*16+tfi
-if k==7 then cp2=cp2-4
-elseif k==8 then cp2=cp2-1
-elseif k==9 then cp2=cp2+1
-elseif k==10 then cp2=cp2+4
-end
-cp2=clamp(cp2,20,275)
-tro=mf((cp2-20)/16) tfi=(cp2-20)%16
+local d=k==7 and -4 or k==8 and -1 or k==9 and 1 or 4
+tfi=tfi+d
+if tfi>15 then if tro<15 then tro=tro+1 tfi=0 else tfi=15 end
+elseif tfi<0 then if tro>0 then tro=tro-1 tfi=15 else tfi=0 end end
 ucpd() rd()
 end
 -- ============================================================
@@ -1105,14 +1101,14 @@ if tmh then
 if not ms then
 if z==1 then
 if y==2 and x>=1 and x<=16 then
-tro=x-1 ucpd() if tr2 then sic() end rd()
+tro=x-1 ucpd() rd()
 elseif y==3 and x>=1 and x<=16 then
-tfi=x-1 ucpd() if tr2 then sic() end rd()
+tfi=x-1 ucpd() rd()
 elseif y==4 and x>=7 and x<=10 then
-tadj(x) sic() thk=x shm:start(0.4)
+tadj(x) thk=x shm:start(0.4)
 end
 elseif z==0 then
-if y==4 and thk then thk=nil shm:stop() sic() end
+if y==4 and thk then thk=nil shm:stop() end
 end
 else
 if z==1 and y==2 and x>=1 and x<=16 then
@@ -1306,7 +1302,7 @@ cued=nil cclk=16 ccc=0 cdc=0 clt=1 cman=false pth=false pflash=0 pflx=0 fldfl=fa
 rchy=nil rchx=nil
 shm=metro.init(function()
 if thk then
-tadj(thk) sic()
+tadj(thk)
 elseif rchy~=nil and rchx~=nil then
 if rchy==1 then
 for s=1,STEPS do
