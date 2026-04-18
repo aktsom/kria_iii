@@ -8,6 +8,7 @@ based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by m
 
 - **kria_iii.lua** — the script to upload to iii
 - **kria_iii_manual.html** — open in a browser for the full manual
+   https://aktsom.github.io/kria_iii/kria_iii_manual.html
 - **kria_iii_commented.lua** — fully annotated reading reference (do not upload — exceeds iii source buffer)
 
 
