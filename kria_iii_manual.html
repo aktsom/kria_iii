@@ -202,7 +202,7 @@ window.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="container">
 <h1>kria iii</h1>
-<p class="subtitle">monome grid one — midi step sequencer — v1.2.0</p>
+<p class="subtitle">monome grid one — midi step sequencer — v1.3.0</p>
 
 
 <!-- ─── FEATURES ──────────────────────────────────────── -->
@@ -510,7 +510,7 @@ window.addEventListener('DOMContentLoaded',function(){
 <p class="pn">hold col 6 — row 7 (trigger page only)</p>
 <p class="desc">internal tempo control and external clock configuration. accessed by holding the dim button at row 7, col 6 on the trigger page. the navigation row is hidden while this page is open.</p>
 <div id="g-time"></div>
-<div class="gn">row 1 col 8: beat pulse · row 2: rough bpm (cols 1-7: +15 bpm, cols 8-16: +20 bpm) · row 3: fine (+0–+15 bpm) · row 4 cols 7-10: nudge</div>
+<div class="gn">internal: row 1 col 8: beat pulse · row 2: rough bpm · row 3: fine bpm · row 4 cols 7-10: nudge &nbsp;|&nbsp; external: row 1 col 8: beat pulse · row 2: detected bpm (read-only) · row 3 cols 6-11: step resolution</div>
 
 <p class="desc" style="margin-top:4px">— internal clock (no external midi clock)</p>
 <p class="desc">bpm = cols 1-7: 30 + (col - 1) × 15; cols 8-16: 120 + (col - 7) × 20. fine row adds 0–15 bpm offset. quarter note = 4 steps (step period = 15 / bpm seconds).</p>
@@ -535,8 +535,18 @@ window.addEventListener('DOMContentLoaded',function(){
 <p class="desc" style="margin-top:8px">— external midi clock</p>
 <ul class="fl">
   <li>when external midi clock (0xF8) is detected, internal clock is disabled.</li>
-  <li><span class="k">row 2, cols 1-16:</span> sets the clock subdivision (sp) — how many midi clock pulses equal one sequencer step. default = 6 (sixteenth notes at 24ppqn).</li>
+  <li><span class="k">row 2, cols 1-16:</span> detected bpm indicator (read-only). single lit led shows the incoming tempo mapped to the 30–300 bpm range. col 1 = 30 bpm, col 16 = 300 bpm.</li>
+  <li><span class="k">row 3, cols 6-11:</span> step resolution selector. sets how many midi clock pulses equal one sequencer step. col 6 = slowest, col 11 = fastest. changing resolution resets the pulse counter for a clean transition.</li>
 </ul>
+<table class="dt">
+<tr><th>col</th><th>division</th><th>steps/beat</th></tr>
+<tr><td>6</td><td>8th notes</td><td>2</td></tr>
+<tr><td>7</td><td>quarter triplets</td><td>3</td></tr>
+<tr><td class="k">8</td><td class="k">16th notes (default)</td><td class="k">4</td></tr>
+<tr><td>9</td><td>8th triplets</td><td>6</td></tr>
+<tr><td>10</td><td>32nd notes</td><td>8</td></tr>
+<tr><td>11</td><td>16th triplets</td><td>12</td></tr>
+</table>
 </div>
 
 <!-- ─── CONFIG PAGE ───────────────────────────────────── -->
@@ -627,13 +637,14 @@ window.addEventListener('DOMContentLoaded',function(){
 <h2>changelog</h2>
 <table class="dt">
 <tr><th>version</th><th>changes</th></tr>
+<tr><td class="k">v1.3.0</td><td>external clock time page redesigned: row 2 now shows detected bpm indicator (read-only, cols 1-16 map 30–300 bpm). row 3 now shows step resolution selector with 6 musical divisions only (cols 6-11: 8th notes, quarter triplets, 16th notes, 8th triplets, 32nd notes, 16th triplets) — changing resolution resets the pulse counter. nav row: selected track always shows at full brightness regardless of mute state.</td></tr>
 <tr><td class="k">v1.2.0</td><td>tempo system redesigned: bpm-based (30–300 bpm) replacing ms-based control. rough row: 15 bpm steps for cols 1-7 (30–120), 20 bpm steps for cols 8-16 (140–300). fine row: +0–+15 bpm offset. nudge buttons now cross rough column boundaries for full-range traversal. alt-note loop initialises to match trigger loop at startup.</td></tr>
 <tr><td class="k">v1.1.0</td><td>default tempo changed to 120 bpm (rough col 7 + fine col 10 = 125ms). trigger page: note brightness on selected track now matches other tracks — playhead is always the brightest element. scale page: reverse direction now correctly starts from loop end (le/ale) rather than step 16. midi clock: internal tempo correctly restored from time page settings when switching back from external clock.</td></tr>
 <tr><td class="k">v1.0.0</td><td>initial stable release.</td></tr>
 </table>
 </div>
 
-<p class="footer">kria iii — monome grid one — midi step sequencer — v1.2.0</p>
+<p class="footer">kria iii — monome grid one — midi step sequencer — v1.3.0</p>
 </div>
 </body>
 </html>

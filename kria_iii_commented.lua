@@ -1,5 +1,5 @@
 -- ============================================================
--- kria iii  v1.1.0
+-- kria iii  v1.3.0
 -- ============================================================
 -- 4-track MIDI step sequencer for monome grid + iii
 -- single file, lua 5.3, ~31-32 KB heap ceiling + ~32 KB source buffer
@@ -556,7 +556,7 @@ function dnav()
 for x=1,16 do gl(x,8,F) end
 for t=1,4 do
 local b
-if t==at then b=mute[t] and 8 or BF
+if t==at then b=BF
 else b=mute[t] and 1 or 5 end
 gl(t,8,b)
 end
@@ -1116,7 +1116,7 @@ end
 else
 if z==1 and y==3 and x>=6 and x<=11 then
 sp=(x==6 and 12 or x==7 and 8 or x==8 and 6 or x==9 and 4 or x==10 and 3 or 2)
-rd()
+cp=0 rd()
 end
 end
 return

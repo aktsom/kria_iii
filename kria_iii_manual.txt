@@ -493,10 +493,11 @@ internal tempo control and external clock configuration. accessed by holding
 the dim button at row 7, col 6 on the trigger page. the navigation row is
 hidden while this page is open.
 
-row 1 col 8: beat pulse
-row 2: rough bpm (cols 1-7: +15 bpm, cols 8-16: +20 bpm)
-row 3: fine (+0–+15 bpm)
-row 4 cols 7-10: nudge
+internal clock:
+row 1 col 8: beat pulse · row 2: rough bpm · row 3: fine bpm · row 4 cols 7-10: nudge
+
+external midi clock:
+row 1 col 8: beat pulse · row 2: detected bpm (read-only) · row 3 cols 6-11: step resolution
 
 --- internal clock (no external midi clock) ---
 
@@ -535,8 +536,22 @@ col  |  rough bpm  ||  col  |  rough bpm
 
 - when external midi clock (0xF8) is detected, internal clock is disabled.
 
-- row 2, cols 1-16: sets the clock subdivision (sp) — how many midi clock
-  pulses equal one sequencer step. default = 6 (sixteenth notes at 24ppqn).
+- row 2, cols 1-16: detected bpm indicator (read-only). single lit led shows
+  the incoming tempo mapped to the 30–300 bpm range. col 1 = 30 bpm,
+  col 16 = 300 bpm.
+
+- row 3, cols 6-11: step resolution selector. sets how many midi clock pulses
+  equal one sequencer step. col 6 = slowest, col 11 = fastest. changing
+  resolution resets the pulse counter for a clean transition.
+
+  col  |  division             |  steps/beat
+  -----+-----------------------+------------
+  6    |  8th notes            |  2
+  7    |  quarter triplets     |  3
+  8    |  16th notes (default) |  4
+  9    |  8th triplets         |  6
+  10   |  32nd notes           |  8
+  11   |  16th triplets        |  12
 
 
 ================================================================================
@@ -655,6 +670,15 @@ active pattern               slot 1
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.3.0
+  - external clock time page redesigned:
+    - row 2: detected bpm indicator (read-only, cols 1-16 map 30–300 bpm).
+    - row 3: step resolution selector, 6 musical divisions only (cols 6-11:
+      8th notes, quarter triplets, 16th notes, 8th triplets, 32nd notes,
+      16th triplets). changing resolution resets the pulse counter.
+  - nav row: selected track always shows at full brightness regardless of
+    mute state.
 
 v1.2.0
   - tempo system redesigned: bpm-based (30–300 bpm) replacing ms-based control.
