@@ -673,6 +673,7 @@ ccc=0
 for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) dc[t]=0 aph[t]=(sdir[t]==2 and ale[t] or als[t]) adc[t]=0 nph[t]=als[t] end
 if tr2 then
 for t=1,4 do if not mute[t] and tr[t][ph[t]] then son(t,ph[t]) end end
+cp=0 if not ms then sic() end
 end
 rd() gl(16,7,BF) gr()
 end
