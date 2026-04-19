@@ -791,7 +791,8 @@ if ms then
 gl(8,1,pb)
 local db=clamp(math.floor(1+(60*sp/(cpd*24)-30)/270*15),1,16)
 for x=1,16 do gl(x,2,x==db and BF or D) end
-for x=1,16 do gl(x,3,x==sp and BF or D) end
+local dc=(sp==12 and 6 or sp==8 and 7 or sp==6 and 8 or sp==4 and 9 or sp==3 and 10 or sp==2 and 11 or 0)
+for x=6,11 do gl(x,3,x==dc and BF or D) end
 else
 gl(8,1,pb)
 for x=1,16 do gl(x,2,(x==tro+1) and BF or D) end
@@ -1113,8 +1114,9 @@ elseif z==0 then
 if y==4 and thk then thk=nil shm:stop() end
 end
 else
-if z==1 and y==3 and x>=1 and x<=16 then
-sp=x rd()
+if z==1 and y==3 and x>=6 and x<=11 then
+sp=(x==6 and 12 or x==7 and 8 or x==8 and 6 or x==9 and 4 or x==10 and 3 or 2)
+rd()
 end
 end
 return
