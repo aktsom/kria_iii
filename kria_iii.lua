@@ -593,7 +593,9 @@ function dtim()
 local pb=cbt==0 and BF or D
 if ms then
 gl(8,1,pb)
-for x=1,16 do gl(x,2,(x==sp) and BF or D) end
+local db=clamp(math.floor(1+(60*sp/(cpd*24)-30)/270*15),1,16)
+for x=1,16 do gl(x,2,x==db and BF or D) end
+for x=1,16 do gl(x,3,x==sp and BF or D) end
 else
 gl(8,1,pb)
 for x=1,16 do gl(x,2,(x==tro+1) and BF or D) end
@@ -893,7 +895,7 @@ elseif z==0 then
 if y==4 and thk then thk=nil shm:stop() end
 end
 else
-if z==1 and y==2 and x>=1 and x<=16 then
+if z==1 and y==3 and x>=1 and x<=16 then
 sp=x rd()
 end
 end
