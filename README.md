@@ -1,14 +1,16 @@
 # kria iii
 
-4-track MIDI step sequencer for [monome grid](https://monome.org/docs/grid/) running on the [iii scripting environment](https://github.com/monome/iii).
+4 track midi step sequencer for [monome grid](https://monome.org/docs/grid/) running on the [iii scripting environment](https://github.com/monome/iii).
 
-Based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by monome, adapted for MIDI output with additional features.
+based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by monome, adapted for midi output with additional features.
 
 ## files
 
 - **kria_iii.lua** — the script to upload to iii
-- **kria_iii_commented.lua** — fully annotated reading reference (do not upload — exceeds iii source buffer)
 - **kria_iii_manual.html** — open in a browser for the full manual
+   https://aktsom.github.io/kria_iii/kria_iii_manual.html
+- **kria_iii_commented.lua** — fully annotated reading reference (do not upload — exceeds iii source buffer)
+
 
 ## features
 
@@ -19,17 +21,17 @@ Based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by m
 - per-step probability and note quantization mode
 - 16 scale presets with editable intervals, live micro-adjust
 - 16 pattern slots with flash persistence and quantized cueing
-- internal tempo control (20–275ms per step) and external MIDI clock input
+- internal tempo control (30-300bpm) and external MIDI clock input
 - configurable MIDI channel per track, MIDI clock output
 
 ## requirements
 
-- monome grid (16×8 or 8×8)
+- monome grid 128
 - iii scripting environment
 
 ## usage
 
-Upload `kria_iii.lua` via the iii web interface. See `kria_iii_manual.html` for full documentation.
+upload `kria_iii.lua` via the iii web interface. See `kria_iii_manual.html` for full documentation.
 
 ## version
 
