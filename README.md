@@ -1,12 +1,5 @@
 # kria iii
 
-[![Alt Text](https://www.dropbox.com/scl/fi/k5lgwjdy6362ju2mzcn0u/share_3579306585275380974.png?rlkey=hvlc2xanzs4sdzcz8hl7nkj38&st=395car62&dl=0  )](https://youtu.be/Ynk5TH-5ydM?is=YXsqTXmSho-VT4xG)
-
-
-
-
-https://youtu.be/Ynk5TH-5ydM?is=YXsqTXmSho-VT4xG
-
 4 track midi step sequencer for [monome grid](https://monome.org/docs/grid/) running on the [iii scripting environment](https://github.com/monome/iii).
 
 based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by monome, adapted for midi output with additional features.
