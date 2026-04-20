@@ -1,5 +1,8 @@
 # kria iii
 
+[![Watch the video](https://youtube.com)](https://www.youtube.com/watch?v=YXsqTXmSho-VT4xG)
+
+
 https://youtu.be/Ynk5TH-5ydM?is=YXsqTXmSho-VT4xG
 
 4 track midi step sequencer for [monome grid](https://monome.org/docs/grid/) running on the [iii scripting environment](https://github.com/monome/iii).
