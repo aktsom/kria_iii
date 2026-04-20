@@ -1,6 +1,6 @@
 # kria iii
 
-[![Watch the video](https://youtube.com)](https://www.youtube.com/watch?v=YXsqTXmSho-VT4xG)
+[![Watch the video](https://youtube.com)](https://youtu.be/Ynk5TH-5ydM?is=YXsqTXmSho-VT4xG)
 
 
 https://youtu.be/Ynk5TH-5ydM?is=YXsqTXmSho-VT4xG
