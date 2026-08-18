@@ -1,23 +1,36 @@
--- kria iii v1.6.2
+-- kria iii v1.6.3
 collectgarbage("collect")
 STEPS=16
 tro=6 tfi=0 cpd=0.125
 TCH={1,2,3,4}
 MC8={0xF8} MCA={0xFA} MCC={0xFC} gcc=0
-DV={1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32}
-SD={{2,2,1,2,2,2,1},{2,1,2,2,2,1,2},{1,2,2,2,1,2,2},{2,2,2,1,2,2,1},{2,2,1,2,2,1,2},{2,1,2,2,1,2,2},{1,2,2,1,2,2,2}}
-local _c={1,1,1,1,1,1,1} for i=8,16 do SD[i]=_c end
+DV="\1\2\3\4\5\6\7\8\10\12\14\16\20\24\28\32"
 SDF="2212221212221212221222221221221221221221221221222"
 function gSDR(s) local t={} for i=1,7 do local c=SDF:byte((s-1)*7+i) t[i]=c and c-48 or 1 end return t end
+SD={} for i=1,7 do SD[i]=gSDR(i) end
+local _c=gSDR(8) for i=8,16 do SD[i]=_c end
 F=0 D=5 M=9 H=13 BF=15
 ODR=5
-OR={[2]=36,[3]=24,[4]=12,[5]=0,[6]=-12,[7]=-24}
-GO={-24,-12,0,12,24,36,48,60}
 NP=16
 DM={16,14,12,10,8,4,2,1,.75,.625,.5,.375,.25,.187,.125,.0625}
-VL={20,40,60,80,95,112,127}
-PP={{false,false,false,false},{true,false,false,false},{true,false,true,false},{true,true,true,false},{true,true,true,true}}
-WK={0,2,4,5,7,9,11}
+VL="\20\40\60\80\95\112\127"
+PP="00001000101011101111"
+WK="\0\2\4\5\7\9\11"
+SH="\0\1\4\7\10\13\16\21\24" MKS="\1\7\7\7\7\7\31\7\7"
+STD=1<<1|5<<4|5<<7|5<<10|1<<13|1<<16|6<<24
+MTC=1|7<<13|31<<16 VTC=1<<13|1<<16
+st={}
+function gf(f,t,s) return (st[t*16+s-16]>>SH:byte(f))&MKS:byte(f) end
+function sf(f,t,s,v) local k=t*16+s-16 local m=MKS:byte(f) local h=SH:byte(f) st[k]=(st[k]&~(m<<h))|((v&m)<<h) end
+function cpm(m,a,b) for s=1,STEPS do local k=a*16+s-16 st[k]=(st[k]&~m)|(st[b*16+s-16]&m) end end
+function clm(m,v,t) for s=1,STEPS do local k=t*16+s-16 st[k]=(st[k]&~m)|v end end
+function nst(f,x,v)
+local k=at*16+x-16
+if nsyn then
+if gf(f,at,x)==v and st[k]&1==1 then st[k]=st[k]&~MTC|VTC
+else sf(f,at,x,v) st[k]=st[k]|1 end
+else sf(f,at,x,v) end
+end
 sr=48 si={2,2,1,2,2,2,1} asd=1 cs={}
 sadj={0,0,0,0,0,0,0}
 shk=nil
@@ -29,16 +42,17 @@ for i=2,7 do cs[i]=cs[i-1]+si[i-1] end
 for i=8,14 do cs[i]=cs[i-7]+12 end
 for i=15,21 do cs[i]=cs[i-14]+24 end
 end
-function rget(t,s,i) return rsl[t][s] & (1 << (i-1)) ~= 0 end
+function rget(t,s,i) return st[t*16+s-16] & (1 << (15+i)) ~= 0 end
 function rset(t,s,i,v)
-if v then rsl[t][s] = rsl[t][s] | (1 << (i-1))
-else rsl[t][s] = rsl[t][s] & ~(1 << (i-1)) end
+local k=t*16+s-16
+if v then st[k] = st[k] | (1 << (15+i))
+else st[k] = st[k] & ~(1 << (15+i)) end
 end
 function ucpd() local b=tro<7 and 30+tro*15 or 120+(tro-6)*20 cpd=15/(b+tfi) if tr2 and not ms then icl.time=cpd/sp end end
 function nls(t,s)
-local r=du[t][s] or 0 local m=DM[17-gdu[t]] or 1
+local r=gf(4,t,s) or 0 local m=DM[17-gdu[t]] or 1
 local frac=r==0 and 0.1 or r/5
-return mx(cpd*(DV[dv2[t]] or 1)*frac*m,.02)
+return mx(cpd*DV:byte(dv2[t] or 1)*frac*m,.02)
 end
 function aliw(t) return als[t]>ale[t] end
 function ainl(t,s)
@@ -84,24 +98,24 @@ end
 function anxs(t) return gnxs(t,aph,als,ale,aliw,allen,addr) end
 function adva(t)
 adc[t]=(adc[t] or 0)+1
-if adc[t]<DV[adv2[t] or 1] then return end
+if adc[t]<DV:byte(adv2[t] or 1) then return end
 adc[t]=0
 aph[t]=anxs(t)
 end
 function mnf(t,s)
-local ni=no[t][s] or 1
+local ni=gf(2,t,s) or 1
 local as=aph[t] or 1
-local av=an2[t][as] or 0
+local av=gf(8,t,as) or 0
 ni=((ni-1)+av)%7+1
 local adj=sadj[((ni-1)%7)+1] or 0
-return clamp((cs[ni] or sr)+adj+(OR[oc[t][s]] or 0)+(GO[go2[t]] or 0),0,127)
+return clamp((cs[ni] or sr)+adj+(5-(gf(3,t,s) or 5))*12+((go2[t] or 3)-3)*12,0,127)
 end
 function son(t,s)
 if mute[t] then return end
 local mn=mnf(t,s)
 local prev=an[t] nom[t]:stop()
 if not tie and prev>=0 then midi_note_off(prev,0,TCH[t]) end
-midi_note_on(mn,VL[ve[t][s] or 6],TCH[t]) an[t]=mn nom[t]:start(nls(t,s))
+midi_note_on(mn,VL:byte(gf(9,t,s) or 6),TCH[t]) an[t]=mn nom[t]:start(nls(t,s))
 if tie and prev>=0 and prev~=mn then midi_note_off(prev,0,TCH[t]) end
 end
 function sof(t)
@@ -125,9 +139,12 @@ if s>le[t] and s<ls[t] then s=ls[t] end
 else if s>le[t] or s>STEPS then s=ls[t] end end
 nph[t]=s
 end
+function rph(t)
+ph[t]=(sdir[t]==2 and le[t] or ls[t]) aph[t]=(sdir[t]==2 and ale[t] or als[t]) nph[t]=ls[t]
+end
 function adv(t)
 dc[t]=(dc[t] or 0)+1
-if dc[t]<DV[dv2[t] or 1] then return false end
+if dc[t]<DV:byte(dv2[t] or 1) then return false end
 dc[t]=0
 if not pld then
 ph[t]=nxs(t) adva(t)
@@ -139,9 +156,9 @@ for tt=1,4 do if psnap[tt] then local sl=(psnap[tt][2]-psnap[tt][1]+STEPS)%STEPS
 end
 end
 if mute[t] then sof(t) return true end
-if tr[t][ph[t]] then
-if PP[prb[t][ph[t]] or 5][lc[t]+1] then
-local nd=rdv[t][ph[t]] or 1
+if gf(1,t,ph[t])==1 then
+if PP:byte((gf(5,t,ph[t]) or 5)*4+lc[t]-3)==49 then
+local nd=gf(6,t,ph[t]) or 1
 local ns=tclk[t] and nph[t] or ph[t]
 if nd<=1 then
 if rget(t,ph[t],1) then son(t,ns) if tclk[t] and not pld then advnph(t) end end
@@ -175,12 +192,12 @@ end
 else
 local mx2=0
 for t=1,4 do
-local len=llen(t)*(DV[dv2[t] or 1] or 1)
+local len=llen(t)*DV:byte(dv2[t] or 1)
 if len>mx2 then mx2=len clt=t end
 end
 cclk=llen(clt)
 cdc=cdc+1
-if cdc>=(DV[dv2[clt] or 1] or 1) then
+if cdc>=DV:byte(dv2[clt] or 1) then
 cdc=0
 ccc=ccc+1
 if ccc>=cclk then
@@ -204,40 +221,36 @@ if tr2 and not ms then return end
 ms=true tr2=true icl:stop() idl:stop() cp=0 pt={} cbt=0 cpls=false ccc=0
 for t=1,4 do lc[t]=0 end
 for t=1,4 do
-ph[t]=(sdir[t]==2 and le[t] or ls[t]) dc[t]=0 aph[t]=(sdir[t]==2 and ale[t] or als[t]) adc[t]=0 nph[t]=ls[t]
-if tr[t][ph[t]] then son(t,ph[t]) else sof(t) end
+rph(t) dc[t]=0 adc[t]=0
+if gf(1,t,ph[t])==1 then son(t,ph[t]) else sof(t) end
 end
 rd()
 elseif b1==0xFC then if not ms then return end tr2=false ms=false pt={} ucpd() ano() idl:start()
-for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) aph[t]=(sdir[t]==2 and ale[t] or als[t]) nph[t]=ls[t] lc[t]=0 end
+for t=1,4 do rph(t) lc[t]=0 end
 rd()
 end
 end
 function cap()
-local b={} local n=0
+local b={} local r={}
 for t=1,4 do
 for s=1,STEPS do
-n=n+1
-b[n]=SC((tr[t][s] and 1 or 0),no[t][s],oc[t][s],du[t][s],prb[t][s],rdv[t][s],rsl[t][s],an2[t][s]+50)
+local w=st[t*16+s-16]
+r[s]=SC(w&1,w>>1&7,w>>4&7,w>>7&7,w>>10&7,w>>13&7,w>>16&31,(w>>21&7)+50)
 end
-n=n+1
-b[n]=SC(ph[t],ls[t],le[t],dv2[t],aph[t],als[t],ale[t],adv2[t])
+r[17]=SC(ph[t],ls[t],le[t],dv2[t],aph[t],als[t],ale[t],adv2[t])
+b[t]=table.concat(r,"",1,17)
 end
-n=n+1 b[n]=SC(sr,asd)
-for i=1,7 do n=n+1 b[n]=SC(si[i]) end
-n=n+1 b[n]=SC(go2[1],go2[2],go2[3],go2[4])
-n=n+1 b[n]=SC(gdu[1],gdu[2],gdu[3],gdu[4])
-n=n+1 b[n]=SC(sdir[1],sdir[2],sdir[3],sdir[4])
-n=n+1 b[n]=SC(mute[1] and 1 or 0,mute[2] and 1 or 0,mute[3] and 1 or 0,mute[4] and 1 or 0)
-for t=1,4 do
-for s=1,STEPS do n=n+1 b[n]=SC(ve[t][s]) end
-end
-n=n+1 b[n]=SC(tclk[1] and 1 or 0,tclk[2] and 1 or 0,tclk[3] and 1 or 0,tclk[4] and 1 or 0)
-n=n+1 b[n]=SC(nsyn and 1 or 0,lsyn)
-n=n+1 b[n]=SC(lsnap and 1 or 0)
-for p=1,16 do local sp=SD[p] or {} for i=1,7 do n=n+1 b[n]=SC(sp[i] or 1) end end
-n=n+1 b[n]=SC(tie and 1 or 0)
-return table.concat(b)
+b[5]=SC(sr,asd,si[1],si[2],si[3],si[4],si[5],si[6],si[7])
+b[6]=SC(go2[1],go2[2],go2[3],go2[4],gdu[1],gdu[2],gdu[3],gdu[4],sdir[1],sdir[2],sdir[3],sdir[4],mute[1] and 1 or 0,mute[2] and 1 or 0,mute[3] and 1 or 0,mute[4] and 1 or 0)
+local n=0
+for t=1,4 do for s=1,STEPS do n=n+1 r[n]=SC(st[t*16+s-16]>>24&7) end end
+b[7]=table.concat(r,"",1,n)
+b[8]=SC(tclk[1] and 1 or 0,tclk[2] and 1 or 0,tclk[3] and 1 or 0,tclk[4] and 1 or 0,nsyn and 1 or 0,lsyn,lsnap and 1 or 0)
+n=0
+for p=1,16 do local sp=SD[p] for i=1,7 do n=n+1 r[n]=SC(sp[i] or 1) end end
+b[9]=table.concat(r,"",1,n)
+b[10]=SC(tie and 1 or 0)
+return table.concat(b,"",1,10)
 end
 function rst(d)
 if type(d)~="string" then return end
@@ -246,18 +259,12 @@ for t=1,4 do
 local tb=(t-1)*136
 for s=1,STEPS do
 local o=tb+(s-1)*8
-tr[t][s]=B(d,o+1)==1
-no[t][s]=B(d,o+2)
 local ov=B(d,o+3)
 if ov<2 or ov>7 then ov=ODR end
-oc[t][s]=ov
 local dv=B(d,o+4)
 if dv>5 then dv=1 end
-du[t][s]=dv
-prb[t][s]=clamp(B(d,o+5) or 5,1,5)
-rdv[t][s]=clamp(B(d,o+6) or 1,1,5)
-rsl[t][s]=B(d,o+7) or 1
-an2[t][s]=clamp((B(d,o+8) or 50)-50,0,6)
+local k=t*16+s-16
+st[k]=st[k]&(7<<24)|(B(d,o+1)==1 and 1 or 0)|(B(d,o+2)&7)<<1|ov<<4|dv<<7|clamp(B(d,o+5) or 5,1,5)<<10|clamp(B(d,o+6) or 1,1,5)<<13|((B(d,o+7) or 1)&31)<<16|clamp((B(d,o+8) or 50)-50,0,6)<<21
 end
 local b=tb+128
 ph[t]=clamp(B(d,b+1) or 1,1,STEPS)
@@ -275,7 +282,7 @@ sr=B(d,g+1) asd=B(d,g+2)
 for i=1,7 do si[i]=B(d,g+2+i) end SD[asd]={tu(si)}
 local q=g+9
 for t=1,4 do go2[t]=clamp(B(d,q+t),1,8) gdu[t]=clamp(B(d,q+4+t),1,16) sdir[t]=clamp(B(d,q+8+t),1,5) mute[t]=B(d,q+12+t)==1 end
-if #d>=633 then for t=1,4 do for s=1,STEPS do ve[t][s]=clamp(B(d,570+(t-1)*16+(s-1)) or 6,1,7) end end end
+if #d>=633 then for t=1,4 do for s=1,STEPS do sf(9,t,s,clamp(B(d,570+(t-1)*16+(s-1)) or 6,1,7)) end end end
 if #d>=637 then for t=1,4 do tclk[t]=B(d,633+t)==1 end end
 if #d>=639 then nsyn=B(d,638)==1 lsyn=B(d,639) end
 if #d>=640 then lsnap=B(d,640)==1 end
@@ -288,10 +295,7 @@ function ldp(p,sync)
 if pats[p] then rst(pats[p])
 else
 for t=1,4 do
-for s=1,STEPS do
-tr[t][s]=false no[t][s]=1 oc[t][s]=ODR du[t][s]=5 prb[t][s]=5
-rdv[t][s]=1 rsl[t][s]=1 an2[t][s]=0 ve[t][s]=6
-end
+clm(-1,STD,t)
 ph[t]=1 ls[t]=1 le[t]=STEPS dv2[t]=1 dc[t]=0
 aph[t]=1 als[t]=1 ale[t]=STEPS adv2[t]=1 adc[t]=0 addr[t]=1 nph[t]=1 tclk[t]=false
 end
@@ -299,9 +303,9 @@ end
 ap=p if sync~=false then ccc=0 end
 if sync~=false then ano() end
 for t=1,4 do ram[t]:stop() rsc[t]=0 end
-for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) aph[t]=(sdir[t]==2 and ale[t] or als[t]) adc[t]=0 nph[t]=ls[t]
-if sync==false then dc[t]=0 sof(t) if tr[t][ph[t]] then son(t,ph[t]) end
-else dc[t]=DV[dv2[t] or 1]-1 end end
+for t=1,4 do rph(t) adc[t]=0
+if sync==false then dc[t]=0 sof(t) if gf(1,t,ph[t])==1 then son(t,ph[t]) end
+else dc[t]=DV:byte(dv2[t] or 1)-1 end end
 if sync~=false then pld=true end
 end
 function svp(p)
@@ -350,71 +354,43 @@ for s=1,STEPS do
 local b
 if s==ph[t] and tr2 then b=mu and 9 or BF
 elseif inl(t,s) then
-if tr[t][s] then b=mu and (sel and 7 or 4) or (sel and 12 or M)
+if gf(1,t,s)==1 then b=mu and (sel and 7 or 4) or (sel and 12 or M)
 else b=mu and (sel and 2 or 1) or (sel and D or 1) end
-else b=tr[t][s] and 2 or F end
+else b=gf(1,t,s)==1 and 2 or F end
 gl(s,t,b)
 end
 end
-gl(6,7,D)
-gl(7,7,D)
-gl(15,7,tr2 and BF or D)
-gl(16,7,D)
+dft()
 end
-function dno()
-local np=tclk[at] and nph[at] or ph[at]
-local il=inl
+function dft()
+gl(6,7,D) gl(7,7,D)
+gl(15,7,tr2 and BF or D) gl(16,7,D)
+end
+function dcm(f,pp,lfn,r7)
 for r=1,7 do
-local si2=(7-r)+1
+local tv=f==8 and 7-r or 8-r
 for s=1,STEPS do
 local b
-local hn=no[at][s]==si2
-local ht=tr[at][s]
-local iph=tr2 and s==np
-if hn and (ht or not nsyn) then
-if iph then b=BF elseif il(at,s) then b=ht and H or D else b=ht and M or D end
-elseif iph then b=D elseif r==7 then b=(not nsyn and ht) and D or 1 else b=F end
-gl(s,r,b)
-end
-end
-end
-function dano()
-for r=1,7 do
-local av=7-r
-for s=1,STEPS do
-local b
-local iph=tr2 and s==aph[at]
-local itr=tr[at][s]
-if an2[at][s]==av and itr then
-if iph then b=BF elseif ainl(at,s) then b=H else b=M end
-else
-if iph then b=D elseif r==7 and itr then b=1 else b=F end
-end
-gl(s,r,b)
-end
-end
-end
-function dve()
-local t=at
-for s=1,STEPS do
-local iph=tr2 and s==ph[t]
-local itr=tr[t][s]
-local vr=8-(ve[t][s] or 6)
-for r=1,7 do
-local b
-if r==vr and itr then
-if iph then b=BF elseif inl(t,s) then b=H else b=M end
+local ht=gf(1,at,s)==1
+local iph=tr2 and s==pp
+if gf(f,at,s)==tv and (ht or (f==2 and not nsyn)) then
+if iph then b=BF elseif lfn(at,s) then b=ht and H or D else b=ht and M or D end
 elseif iph then b=D
+elseif r==7 and r7==1 then b=(not nsyn and ht) and D or 1
+elseif r==7 and r7==2 and ht then b=1
 else b=F end
 gl(s,r,b)
 end
 end
 end
+function dano() dcm(8,aph[at],ainl,2) end
+function dve() dcm(9,ph[at],inl,3) end
+function dno() dcm(2,tclk[at] and nph[at] or ph[at],inl,1) end
 function doc()
 for x=1,16 do gl(x,1,F) end
 for c=1,8 do gl(c,1,(c==go2[at]) and BF or D) end
 for s=1,STEPS do
-local sel=oc[at][s] local iph=(tr2 and s==ph[at]) local itr=tr[at][s]
+local sel=gf(3,at,s) local iph=(tr2 and s==ph[at]) local itr=gf(1,at,s)==1
 for r=2,7 do
 local b local inf
 if sel<5 then inf=(r>=sel and r<=5)
@@ -437,7 +413,7 @@ end
 end
 function ddu()
 for s=1,STEPS do
-local sel=du[at][s] local iph=(tr2 and s==ph[at]) local itr=tr[at][s]
+local sel=gf(4,at,s) local iph=(tr2 and s==ph[at]) local itr=gf(1,at,s)==1
 for r=1,7 do
 local b
 if r==1 then
@@ -454,8 +430,8 @@ end
 end
 function drch()
 for s=1,STEPS do
-local nd=rdv[at][s] or 1
-local iph=(tr2 and s==ph[at]) local itr=tr[at][s]
+local nd=gf(6,at,s) or 1
+local iph=(tr2 and s==ph[at]) local itr=gf(1,at,s)==1
 gl(s,1,iph and M or D)
 for r=2,6 do
 local slot=7-r
@@ -491,7 +467,7 @@ for i=1,8 do gl(i,6,(i==asd or scfl==i) and BF or D) end
 for i=1,8 do gl(i,7,(i+8==asd or scfl==i+8) and BF or D) end
 local ro=(sr-48)%12
 for i=1,7 do
-local o=WK[i] local c=8+i
+local o=WK:byte(i) local c=8+i
 if ro==o then gl(c,7,BF)
 elseif ro==o+1 and i~=3 and i~=7 then gl(c,7,blk and BF or D)
 else gl(c,7,F) end
@@ -515,10 +491,10 @@ end
 end
 function dprb()
 for s=1,STEPS do
-local p=prb[at][s] or 5
+local p=gf(5,at,s) or 5
 local sel=6-p
 local iph=tr2 and s==ph[at]
-local itr=tr[at][s]
+local itr=gf(1,at,s)==1
 for r=1,5 do
 local b
 if r==sel then
@@ -552,9 +528,7 @@ end
 gl(1,7,D)
 gl(2,7,pclh and H or 1)
 gl(3,7,D)
-gl(6,7,D) gl(7,7,D)
-gl(15,7,tr2 and BF or D)
-gl(16,7,D)
+dft()
 end
 function dcfg()
 local nb=nsyn and H or D
@@ -594,7 +568,7 @@ for s=1,STEPS do
 local b local iep=(s==lw or s==lx) local iin
 if wr then iin=(s>lw or s<lx) else iin=(s>lw and s<lx) end
 local sph=nm and aph[t] or ph[t]
-local itr=tr[t][s]
+local itr=gf(1,t,s)==1
 if tr2 and s==sph then b=mu and 9 or BF
 elseif iep then
 if mu then b=sel and (itr and 1 or 2) or 1
@@ -650,8 +624,7 @@ elseif vm==7 then dpat()
 end
 if alpflash then for r=1,7 do gl(als[at],r,BF) gl(ale[at],r,BF) end end
 if (mlh or mth or mph) and not (mlh and vm==12 and not nsyn and lsyn==0) then
-gl(6,7,D) gl(7,7,D)
-gl(15,7,tr2 and BF or D) gl(16,7,D)
+dft()
 end
 end
 gr()
@@ -659,9 +632,9 @@ end
 function pts()
 if tr2 then tr2=false ano() idl:start()
 if not ms then icl:stop() midi_out(MCC) end
-for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) aph[t]=(sdir[t]==2 and ale[t] or als[t]) nph[t]=ls[t] lc[t]=0 end
+for t=1,4 do rph(t) lc[t]=0 end
 else tr2=true cbt=0 cpls=false ccc=0
-for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) dc[t]=DV[dv2[t] or 1]-1 aph[t]=(sdir[t]==2 and ale[t] or als[t]) adc[t]=0 nph[t]=ls[t] lc[t]=0 end
+for t=1,4 do rph(t) dc[t]=DV:byte(dv2[t] or 1)-1 adc[t]=0 lc[t]=0 end
 pld=true idl:stop()
 if not ms then ucpd() icl:stop() cp=0 icl:start(cpd/sp) midi_out(MCA) end
 end
@@ -669,9 +642,9 @@ rd()
 end
 function rts()
 ccc=0
-for t=1,4 do ph[t]=(sdir[t]==2 and le[t] or ls[t]) dc[t]=0 aph[t]=(sdir[t]==2 and ale[t] or als[t]) adc[t]=0 nph[t]=ls[t] lc[t]=0 end
+for t=1,4 do rph(t) dc[t]=0 adc[t]=0 lc[t]=0 end
 if tr2 then
-for t=1,4 do if not mute[t] and tr[t][ph[t]] then son(t,ph[t]) end end
+for t=1,4 do if not mute[t] and gf(1,t,ph[t])==1 then son(t,ph[t]) end end
 cp=0 if not ms then icl:stop() icl:start(cpd/sp) end
 end
 rd()
@@ -718,20 +691,13 @@ end
 if (mth or mph) and x>=1 and x<=4 then rd() return end
 if x>=1 and x<=4 then
 if cpt and cpt~=x then
-if vm==1 then
-for s=1,STEPS do tr[x][s]=tr[cpt][s] end
-elseif vm==11 then
-for s=1,STEPS do tr[x][s]=tr[cpt][s] rsl[x][s]=rsl[cpt][s] rdv[x][s]=rdv[cpt][s] end
-elseif vm==2 then
-for s=1,STEPS do no[x][s]=no[cpt][s] tr[x][s]=tr[cpt][s] end
-elseif vm==12 then
-for s=1,STEPS do no[x][s]=no[cpt][s] tr[x][s]=tr[cpt][s] an2[x][s]=an2[cpt][s] end
-elseif vm==3 then
-for s=1,STEPS do oc[x][s]=oc[cpt][s] end
-elseif vm==13 then
-for s=1,STEPS do ve[x][s]=ve[cpt][s] end
-elseif vm==4 then
-for s=1,STEPS do du[x][s]=du[cpt][s] end
+if vm==1 then cpm(1,x,cpt)
+elseif vm==11 then cpm(1|7<<13|31<<16,x,cpt)
+elseif vm==2 then cpm(15,x,cpt)
+elseif vm==12 then cpm(15|7<<21,x,cpt)
+elseif vm==3 then cpm(7<<4,x,cpt)
+elseif vm==13 then cpm(7<<24,x,cpt)
+elseif vm==4 then cpm(7<<7,x,cpt)
 end
 at=x cpt=nil clrt=nil shm:stop() rd()
 gl(x,8,BF) gr()
@@ -823,28 +789,28 @@ end
 if mph then
 if z==0 then return end
 if y>=1 and y<=5 and x>=1 and x<=STEPS then
-prb[at][x]=6-y
+sf(5,at,x,6-y)
 rd()
 end
 return
 end
 if vm==11 then
 if z==1 and (y==1 or y==7) then
-if tr[at][x] then rchy=y rchx=x shm:start(HT) end
+if gf(1,at,x)==1 then rchy=y rchx=x shm:start(HT) end
 return
 end
 if z==0 then
 if (y==1 or y==7) and rchx==x and rchy==y then
 shm:stop()
-if tr[at][x] then
+if gf(1,at,x)==1 then
 if y==1 then
-local nd=(rdv[at][x] or 1)+1
+local nd=gf(6,at,x)+1
 if nd>5 then nd=5 end
-rdv[at][x]=nd rset(at,x,nd,true)
+sf(6,at,x,nd) rset(at,x,nd,true)
 elseif y==7 then
-local nd=(rdv[at][x] or 1)-1
+local nd=gf(6,at,x)-1
 if nd<1 then nd=1 end
-rdv[at][x]=nd
+sf(6,at,x,nd)
 rset(at,x,nd+1,false)
 end
 end
@@ -855,12 +821,12 @@ end
 return
 end
 if y>=2 and y<=6 and x>=1 and x<=STEPS and z==1 then
-if not tr[at][x] then return end
+if gf(1,at,x)==0 then return end
 local slot=7-y
-local nd=rdv[at][x] or 1
+local nd=gf(6,at,x)
 if slot>nd then
 for i=nd+1,slot-1 do rset(at,x,i,false) end
-rdv[at][x]=slot
+sf(6,at,x,slot)
 rset(at,x,slot,true)
 else
 rset(at,x,slot,not rget(at,x,slot))
@@ -872,7 +838,7 @@ end
 if vm==12 then
 if z==0 then return end
 if y>=1 and y<=7 and x>=1 and x<=STEPS then
-an2[at][x]=7-y
+sf(8,at,x,7-y)
 rd()
 end
 return
@@ -880,11 +846,7 @@ end
 if vm==13 then
 if z==0 then return end
 if y>=1 and y<=7 and x>=1 and x<=STEPS then
-local vv=8-y
-if nsyn then
-if ve[at][x]==vv and tr[at][x] then tr[at][x]=false rdv[at][x]=1 rsl[at][x]=1
-else ve[at][x]=vv tr[at][x]=true end
-else ve[at][x]=vv end
+nst(9,x,8-y)
 rd()
 end
 return
@@ -959,39 +921,26 @@ return
 end
 if vm==1 then
 if y>=1 and y<=4 and x>=1 and x<=STEPS then
-tr[y][x]=not tr[y][x]
-if not tr[y][x] then rdv[y][x]=1 rsl[y][x]=1 end
+local k=y*16+x-16
+if st[k]&1==1 then st[k]=st[k]&~MTC|VTC else st[k]=st[k]|1 end
 rd()
 elseif y==7 and x==15 then pts()
 elseif y==7 and x==16 then rts()
 end
 elseif vm==2 then
 if y>=1 and y<=7 and x>=1 and x<=STEPS then
-local si2=(7-y)+1
-if nsyn then
-if no[at][x]==si2 and tr[at][x] then tr[at][x]=false rdv[at][x]=1 rsl[at][x]=1
-else no[at][x]=si2 tr[at][x]=true end
-else
-no[at][x]=si2
-end
+nst(2,x,(7-y)+1)
 rd()
 end
 elseif vm==3 then
 if y==1 and x>=1 and x<=8 then go2[at]=x rd()
 elseif y>=2 and y<=7 and x>=1 and x<=STEPS then
-if nsyn then
-if oc[at][x]==y and tr[at][x] then tr[at][x]=false rdv[at][x]=1 rsl[at][x]=1
-else oc[at][x]=y tr[at][x]=true end
-else oc[at][x]=y end
+nst(3,x,y)
 rd() end
 elseif vm==4 then
 if y==1 and x>=1 and x<=16 then gdu[at]=x rd()
 elseif y>=2 and y<=7 and x>=1 and x<=STEPS then
-local dv=7-y
-if nsyn then
-if du[at][x]==dv and tr[at][x] then tr[at][x]=false rdv[at][x]=1 rsl[at][x]=1
-else du[at][x]=dv tr[at][x]=true end
-else du[at][x]=dv end
+nst(4,x,7-y)
 rd() end
 elseif vm==6 then
 if sch and y==sch and x>=1 and x<=16 then
@@ -1023,7 +972,7 @@ sdir[y]=x-3 ddr[y]=1 rd()
 elseif y==7 and x==16 then
 shphl=true rd()
 elseif y==7 and x>=9 and x<=15 then
-local o=WK[x-8] local wk=48+o
+local o=WK:byte(x-8) local wk=48+o
 if shphl then
 if x~=11 and x~=15 then sr=(sr==wk+1) and wk or wk+1 else sr=wk end
 else
@@ -1074,24 +1023,17 @@ ap=1 pats={} psx={}
 vm=1 at=1
 nsyn=true lsyn=2 tie=false
 mlh=false mth=false mph=false cfh=false tmh=false lfc=nil lft=nil alpflash=false
-tr={} no={} oc={} du={} ph={} ls={} le={} dv2={} dc={} an={}
+ph={} ls={} le={} dv2={} dc={} an={}
 go2={3,3,3,3} gdu={9,9,9,9} sdir={1,1,1,1} ddr={1,1,1,1}
 mute={false,false,false,false}
-prb={} rdv={} rsl={}
-an2={} ve={} aph={} als={} ale={} adv2={} adc={} addr={}
+aph={} als={} ale={} adv2={} adc={} addr={}
 tclk={false,false,false,false} nph={1,1,1,1}
 blk=false bct=0 shphl=false
 lsnap=false psnap={}
+for i=1,64 do st[i]=STD end
 for t=1,4 do
-tr[t]={} no[t]={} oc[t]={} du[t]={} prb[t]={} rdv[t]={} rsl[t]={}
-an2[t]={} ve[t]={}
 ph[t]=1 ls[t]=1 le[t]=6 dv2[t]=1 dc[t]=0 an[t]=-1
 aph[t]=1 als[t]=1 ale[t]=le[t] adv2[t]=1 adc[t]=0 addr[t]=1
-for s=1,STEPS do
-tr[t][s]=false no[t][s]=1 oc[t][s]=ODR du[t][s]=5 prb[t][s]=5
-rdv[t][s]=1 rsl[t][s]=1
-an2[t][s]=0 ve[t][s]=6
-end
 end
 lc={0,0,0,0}
 ms=false tr2=false cp=0 pt={} PB=8 sp=6 cpls=false cbt=0
@@ -1111,16 +1053,16 @@ local tc=t
 ram[t]=metro.init(function()
 local s=ph[tc]
 rsc[tc]=rsc[tc]+1
-if rsc[tc]>(rdv[tc][s] or 1) then ram[tc]:stop() return end
+if rsc[tc]>gf(6,tc,s) then ram[tc]:stop() return end
 if rget(tc,s,rsc[tc]) then
 local ns=tclk[tc] and nph[tc] or s
 son(tc,ns) if tclk[tc] then advnph(tc) end
 end
 end,.1)
 end
-icl=metro.init(function() tka() end,.125)
+icl=metro.init(tka,.125)
 icl:stop()
-idl=metro.init(function() rd() end,0.25)
+idl=metro.init(rd,0.25)
 idl:start()
 phl=nil HT=0.8 scph=nil pvm=1 scfl=nil
 cued=nil cclk=16 ccc=0 cdc=0 clt=1 cman=false pth=false pflash=0
@@ -1131,30 +1073,31 @@ tadj(thk)
 elseif rchy~=nil and rchx~=nil then
 if rchy==1 then
 for s=1,STEPS do
-local nd=rdv[at][s] or 1
+local nd=gf(6,at,s)
 for i=1,nd do rset(at,s,i,true) end
 end
 elseif rchy==7 then
-rdv[at][rchx]=1 rsl[at][rchx]=1
+local k=at*16+rchx-16
+st[k]=st[k]&~(7<<13|31<<16)|VTC
 end
 rchy=nil rchx=nil shm:stop() rd()
 elseif clrt then
 local t=clrt
 if vm==1 or vm==11 then
-for s=1,STEPS do tr[t][s]=false no[t][s]=1 oc[t][s]=ODR du[t][s]=5 prb[t][s]=5 rdv[t][s]=1 rsl[t][s]=1 an2[t][s]=0 ve[t][s]=6 end
+clm(-1,STD,t)
 go2[t]=3 gdu[t]=9
 ls[t]=1 le[t]=6 als[t]=1 ale[t]=6
 dv2[t]=1 adv2[t]=1 sdir[t]=1 tclk[t]=false
 sof(t) ram[t]:stop() rsc[t]=0
 ph[t]=1 aph[t]=1 nph[t]=1 dc[t]=0 adc[t]=0 lc[t]=0 addr[t]=1
 elseif vm==2 or vm==12 then
-for s=1,STEPS do no[t][s]=1 tr[t][s]=false end
+clm(15,1<<1,t)
 elseif vm==3 then
-for s=1,STEPS do oc[t][s]=ODR end go2[t]=3
+clm(7<<4,5<<4,t) go2[t]=3
 elseif vm==4 then
-for s=1,STEPS do du[t][s]=5 end gdu[t]=9
+clm(7<<7,5<<7,t) gdu[t]=9
 elseif vm==13 then
-for s=1,STEPS do ve[t][s]=6 end
+clm(7<<24,6<<24,t)
 end
 clrt=nil shm:stop() rd()
 gl(t,8,BF) gr()
@@ -1173,5 +1116,6 @@ end,0.4)
 shm:stop()
 grid_led_all(F)
 tr2=false
+cg("collect")
 rd()
 function cleanup() ano() end

@@ -24,6 +24,10 @@ based on the original [ansible kria](https://monome.org/docs/ansible/kria/) by m
 - configurable MIDI channel per track, MIDI clock output
 - consider this a kria lite version. missing features are glide page, meta-patterns, per-parameter clock divisions, division cueing, division sync modes
 
+## what's new in v1.6.3
+
+* **memory usage reduced** - addresses out-of-memory errors some users hit when uploading or while running. all per-step sequence data is now bit-packed into a single flat integer array (replacing 40 lua tables), constant tables are packed into byte strings or computed on the fly, duplicated code paths are consolidated, the pattern-save path allocates far less, and garbage collection runs at the load-time choke points. saved patterns are fully compatible. if an upload still fails with `-- out of memory!`, power-cycle the device and upload again with a fresh boot
+
 ## what's new in v1.6.1
 
 * **midi clock output fix** - kria iii now sends correct midi clock (24ppqn). previously sent 1 pulse per step (4ppqn), causing connected devices to display 1/6 the intended tempo. also fixes transport start/stop not working when connected via usb due to midi loopback
@@ -76,4 +80,4 @@ llm disclosure
 
 ## version
 
-v1.6.2
+v1.6.3
